@@ -1,11 +1,6 @@
-import { Text, View } from "react-native";
+import React from "react";
+import { Redirect } from "expo-router";
 
-
-export default function Index() {
-  return (
-    <View className="flex-1 items-center justify-center bg-blue-300"
-    >
-      <Text className="text-3xl font-bold text-blue-950">Hello World</Text>
-    </View>
-  );
+export default function Home() {
+  return <Redirect href={"/(setup)/welcome"} />;
 }
