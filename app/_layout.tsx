@@ -1,10 +1,84 @@
-import { Stack } from "expo-router";
+import { Stack, usePathname } from "expo-router"; // Import usePathname to detect route
 import { StatusBar } from "expo-status-bar";
+import { useEffect, useState } from "react";
+import { BackHandler, ToastAndroid, AppState, AppStateStatus, TouchableOpacity } from "react-native";
+import * as NavigationBar from "expo-navigation-bar";
 import "../global.css";
 
 export default function RootLayout() {
+  const pathname = usePathname(); // Get current route path
+  const [tapCount, setTapCount] = useState(0);
+  const secretTapTarget = 5; // Number of taps required to unlock
+
+  useEffect(() => {
+    // Hide the navigation bar initially
+    const hideNavBar = async () => {
+      await NavigationBar.setVisibilityAsync("hidden");
+      await NavigationBar.setBehaviorAsync("inset-swipe"); // Keeps it hidden until swiped
+    };
+
+    hideNavBar(); // Run on app startup
+
+    // Function to re-hide the navigation bar after a short delay
+    const rehideNavBar = async () => {
+      const delay = pathname === "/admin" ? 2000 : 10; // 2 seconds in /admin, 10ms everywhere else
+
+      setTimeout(async () => {
+        await NavigationBar.setVisibilityAsync("hidden");
+      }, delay);
+    };
+
+    // Detect user interaction with navigation bar and re-hide it
+    NavigationBar.addVisibilityListener(({ visibility }) => {
+      if (visibility === "visible") {
+        rehideNavBar();
+      }
+    });
+
+    // Prevent users from exiting with the Back button
+    const handleBackPress = () => {
+      ToastAndroid.show("Screen is locked! Contact admin.", ToastAndroid.SHORT);
+      return true; // Block back button
+    };
+
+    BackHandler.addEventListener("hardwareBackPress", handleBackPress);
+
+    // Detect when the app is sent to the background (Home or Overview pressed)
+    const handleAppStateChange = (nextAppState: AppStateStatus) => {
+      if (nextAppState === "background") {
+        ToastAndroid.show("App is locked! Returning...", ToastAndroid.SHORT);
+      }
+    };
+
+    const appStateListener = AppState.addEventListener("change", handleAppStateChange);
+
+    return () => {
+      BackHandler.removeEventListener("hardwareBackPress", handleBackPress);
+      appStateListener.remove();
+    };
+  }, [pathname]); // Re-run effect if route changes
+
+  // Handle secret tap to unlock navigation bar, but ONLY in /admin route
+  const handleSecretTap = async () => {
+    if (pathname === "/admin") {
+      setTapCount((prevCount) => {
+        const newCount = prevCount + 1;
+
+        if (newCount >= secretTapTarget) {
+          ToastAndroid.show("Admin mode activated! Navigation bar unlocked.", ToastAndroid.SHORT);
+          NavigationBar.setVisibilityAsync("visible"); // Show navigation bar permanently in /admin
+        }
+
+        return newCount;
+      });
+
+      // Reset tap counter after 5 seconds
+      setTimeout(() => setTapCount(0), 5000);
+    }
+  };
+
   return (
-    <>
+    <TouchableOpacity onPress={handleSecretTap} style={{ flex: 1 }}>
       <StatusBar hidden={true} />
       <Stack
         screenOptions={{
@@ -23,6 +97,6 @@ export default function RootLayout() {
           }}
         />
       </Stack>
-    </>
+    </TouchableOpacity>
   );
 }
