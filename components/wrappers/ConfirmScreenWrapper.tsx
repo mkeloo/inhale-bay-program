@@ -34,13 +34,14 @@ export default function ConfirmScreenWrapper({ screenType }: ConfirmScreenWrappe
     const passcode = screenCodes.find((screen) => screen.name === screenType)?.code.toString();
 
 
-    const translateY = useSharedValue(50); // Start off-screen
-    const opacity = useSharedValue(0); // Hidden initially
+    const translateY = useSharedValue(statusMessage ? 50 : 0); // Move up if message exists
+    const opacity = useSharedValue(statusMessage ? 0 : 1); // Keep default visible
 
     const animatedStyle = useAnimatedStyle(() => ({
-        transform: [{ translateY: translateY.value }],
-        opacity: opacity.value,
+        transform: [{ translateY: statusMessage ? translateY.value : 0 }], // Move only when needed
+        opacity: statusMessage ? opacity.value : 1, // Keep default message visible
     }));
+
 
     const showStatusMessage = (message: string, isError: boolean) => {
         setStatusMessage(message);
@@ -138,9 +139,9 @@ export default function ConfirmScreenWrapper({ screenType }: ConfirmScreenWrappe
                 </View>
 
                 {/* Error/Success Message */}
-                {statusMessage && (
-                    <Animated.View style={[animatedStyle]} className="mt-2 p-4 rounded-lg flex flex-row items-center space-x-3">
-                        {isError ? (
+                <Animated.View style={[animatedStyle]} className="mt-4 p-4 rounded-lg flex flex-row items-center space-x-3">
+                    {statusMessage ? (
+                        isError ? (
                             <Text className="text-xl font-semibold bg-red-300 text-red-700 p-4 rounded-lg">
                                 {statusMessage}
                             </Text>
@@ -152,9 +153,14 @@ export default function ConfirmScreenWrapper({ screenType }: ConfirmScreenWrappe
                                 {/* Activity Indicator (Only for Success Message) */}
                                 <ActivityIndicator size="small" color="#047857" />
                             </View>
-                        )}
-                    </Animated.View>
-                )}
+                        )
+                    ) : (
+                        // Default Yellow Message (Now Always Visible)
+                        <Text className="text-xl font-semibold bg-yellow-300 text-yellow-700 p-4 rounded-lg">
+                            Awaiting Input...
+                        </Text>
+                    )}
+                </Animated.View>
             </View>
 
             {/* Right Side: Keypad */}
@@ -165,7 +171,7 @@ export default function ConfirmScreenWrapper({ screenType }: ConfirmScreenWrappe
                         <TouchableOpacity
                             key={num}
                             onPress={() => handlePress(num.toString())}
-                            className="w-20 h-20 bg-blue-600 rounded-xl flex items-center justify-center  active:scale-90 transition-transform duration-150"
+                            className="w-20 h-20 bg-blue-600 rounded-xl flex items-center justify-center"
                         >
                             <Text className="text-3xl font-bold text-white">{num}</Text>
                         </TouchableOpacity>
@@ -176,7 +182,7 @@ export default function ConfirmScreenWrapper({ screenType }: ConfirmScreenWrappe
                         <TouchableOpacity
                             key={num}
                             onPress={() => handlePress(num.toString())}
-                            className="w-20 h-20 bg-blue-600 rounded-xl flex items-center justify-center  active:scale-90 transition-transform duration-150"
+                            className="w-20 h-20 bg-blue-600 rounded-xl flex items-center justify-center"
                         >
                             <Text className="text-3xl font-bold text-white">{num}</Text>
                         </TouchableOpacity>
@@ -187,7 +193,7 @@ export default function ConfirmScreenWrapper({ screenType }: ConfirmScreenWrappe
                         <TouchableOpacity
                             key={num}
                             onPress={() => handlePress(num.toString())}
-                            className="w-20 h-20 bg-blue-600 rounded-xl flex items-center justify-center  active:scale-90 transition-transform duration-150"
+                            className="w-20 h-20 bg-blue-600 rounded-xl flex items-center justify-center"
                         >
                             <Text className="text-3xl font-bold text-white">{num}</Text>
                         </TouchableOpacity>
@@ -196,21 +202,21 @@ export default function ConfirmScreenWrapper({ screenType }: ConfirmScreenWrappe
                     {/* Fourth Row: Delete, Zero, Enter */}
                     <TouchableOpacity
                         onPress={handleDelete}
-                        className="w-20 h-20 bg-red-600 rounded-xl flex items-center justify-center  active:scale-90 transition-transform duration-150"
+                        className="w-20 h-20 bg-red-600 rounded-xl flex items-center justify-center"
                     >
                         <Delete size={32} color="white" />
                     </TouchableOpacity>
 
                     <TouchableOpacity
                         onPress={() => handlePress('0')}
-                        className="w-20 h-20 bg-blue-600 rounded-xl flex items-center justify-center  active:scale-90 transition-transform duration-150"
+                        className="w-20 h-20 bg-blue-600 rounded-xl flex items-center justify-center"
                     >
                         <Text className="text-3xl font-bold text-white">0</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
                         onPress={handleEnter}
-                        className="w-20 h-20 bg-green-600 rounded-xl flex items-center justify-center  active:scale-90 transition-transform duration-150"
+                        className="w-20 h-20 bg-green-600 rounded-xl flex items-center justify-center"
                     >
                         <BadgeCheck size={32} color="white" />
                     </TouchableOpacity>
