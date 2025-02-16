@@ -3,7 +3,11 @@ import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { screenCodes } from '@/lib/data';
 import { BadgeCheck, Delete, MoveLeft } from 'lucide-react-native';
-import {
+import * as Haptics from 'expo-haptics';
+import Animated, {
+    useSharedValue,
+    useAnimatedStyle,
+    withSpring,
     configureReanimatedLogger,
     ReanimatedLogLevel,
 } from "react-native-reanimated";
@@ -29,46 +33,75 @@ export default function ConfirmScreenWrapper({ screenType }: ConfirmScreenWrappe
     // Get expected passcode based on `screenType`
     const passcode = screenCodes.find((screen) => screen.name === screenType)?.code.toString();
 
+
+    const translateY = useSharedValue(50); // Start off-screen
+    const opacity = useSharedValue(0); // Hidden initially
+
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ translateY: translateY.value }],
+        opacity: opacity.value,
+    }));
+
+    const showStatusMessage = (message: string, isError: boolean) => {
+        setStatusMessage(message);
+        setIsError(isError);
+
+        // Start animation
+        translateY.value = withSpring(0); // Slide in
+        opacity.value = withSpring(1); // Fade in
+
+        setTimeout(() => {
+            translateY.value = withSpring(50); // Slide out
+            opacity.value = withSpring(0); // Fade out
+            setTimeout(() => {
+                setStatusMessage('');
+                setIsError(false);
+            }, 500);
+        }, 2000);
+    };
+
     // Handle number input
     const handlePress = (num: string) => {
         if (inputCode.length < 4) {
             setInputCode((prev) => prev + num);
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); // Haptic feedback
         }
     };
 
     // Handle delete button
     const handleDelete = () => {
         setInputCode((prev) => prev.slice(0, -1)); // Remove last digit
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); // Haptic feedback
     };
 
     // Handle enter button
     const handleEnter = () => {
         if (inputCode === passcode) {
-            setStatusMessage('Access Granted');
-            setIsError(false);
+            showStatusMessage('Access Granted', false);
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); // Haptic success feedback
 
             setTimeout(() => {
                 router.push(`/${screenType}`); // Navigate to the correct screen type
             }, 2000);
         } else {
-            setStatusMessage('Incorrect Passcode');
-            setIsError(true);
+            showStatusMessage('Incorrect Passcode', true);
             setInputCode(''); // Reset input if incorrect
-
-            // Clear error message after 2 seconds
-            setTimeout(() => {
-                setStatusMessage('');
-                setIsError(false);
-            }, 2000);
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error); // Haptic error feedback
         }
     };
+
 
     return (
         <View className="flex-1 flex-row p-5 bg-gray-900 relative">
 
             {/* Back Button */}
             <View className='absolute top-0 left-0 right-0 bottom-0' >
-                <TouchableOpacity onPress={() => router.back()} className='absolute top-10 left-10 px-3 py-2 bg-yellow-500 rounded-lg active:scale-90 transition-transform duration-150'>
+                <TouchableOpacity
+                    onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); // Haptic feedback
+                        router.back();
+                    }}
+                    className='absolute top-10 left-10 px-3 py-2 bg-yellow-500 rounded-lg active:scale-90 transition-transform duration-150'>
                     <MoveLeft size={32} color="white" />
                 </TouchableOpacity>
             </View>
@@ -106,7 +139,7 @@ export default function ConfirmScreenWrapper({ screenType }: ConfirmScreenWrappe
 
                 {/* Error/Success Message */}
                 {statusMessage && (
-                    <View className="mt-2 p-4 rounded-lg flex flex-row items-center space-x-3">
+                    <Animated.View style={[animatedStyle]} className="mt-2 p-4 rounded-lg flex flex-row items-center space-x-3">
                         {isError ? (
                             <Text className="text-xl font-semibold bg-red-300 text-red-700 p-4 rounded-lg">
                                 {statusMessage}
@@ -120,7 +153,7 @@ export default function ConfirmScreenWrapper({ screenType }: ConfirmScreenWrappe
                                 <ActivityIndicator size="small" color="#047857" />
                             </View>
                         )}
-                    </View>
+                    </Animated.View>
                 )}
             </View>
 
