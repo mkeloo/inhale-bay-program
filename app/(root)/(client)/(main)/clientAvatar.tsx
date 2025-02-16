@@ -9,6 +9,7 @@ import Animated, {
     withSpring,
     withTiming,
 } from 'react-native-reanimated';
+import BackButton from '@/components/shared/BackButton';
 
 export default function ClientAvatarScreen() {
     const [selectedAvatar, setSelectedAvatar] = useState<number | null>(null);
@@ -58,6 +59,11 @@ export default function ClientAvatarScreen() {
 
     return (
         <ScrollView contentContainerClassName="relative flex items-center justify-center bg-gray-900 py-10 pb-32">
+
+            {/* Back Button */}
+            <BackButton />
+
+
             <Text className="text-white text-3xl font-bold mb-6">Select Your Avatar</Text>
 
             {/* Avatar Grid */}

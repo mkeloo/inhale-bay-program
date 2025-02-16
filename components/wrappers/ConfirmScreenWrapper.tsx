@@ -11,6 +11,7 @@ import Animated, {
     configureReanimatedLogger,
     ReanimatedLogLevel,
 } from "react-native-reanimated";
+import BackButton from '../shared/BackButton';
 
 // This is the default configuration
 configureReanimatedLogger({
@@ -100,16 +101,7 @@ export default function ConfirmScreenWrapper({ screenType }: ConfirmScreenWrappe
         <View className="flex-1 flex-row p-5 bg-gray-900 relative">
 
             {/* Back Button */}
-            <View className='absolute top-0 left-0 right-0 bottom-0' >
-                <TouchableOpacity
-                    onPress={() => {
-                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); // Haptic feedback
-                        router.back();
-                    }}
-                    className='absolute top-10 left-10 px-3 py-2 bg-yellow-500 rounded-lg active:scale-90 transition-transform duration-150'>
-                    <MoveLeft size={32} color="white" />
-                </TouchableOpacity>
-            </View>
+            <BackButton />
 
             {/* Left Side: Passcode Input */}
             <View className="flex-1 justify-center items-center py-4">

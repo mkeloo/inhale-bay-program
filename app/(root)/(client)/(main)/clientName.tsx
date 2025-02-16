@@ -4,6 +4,7 @@ import { Delete, BadgeCheck, Space } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import BackButton from '@/components/shared/BackButton';
 
 export default function ClientNameScreen() {
     const [inputValue, setInputValue] = useState('');
@@ -79,7 +80,11 @@ export default function ClientNameScreen() {
     };
 
     return (
-        <View className="flex-1 items-center justify-center bg-gray-900 p-5">
+        <View className="flex-1 items-center justify-center bg-gray-900 p-5 relative">
+
+            {/* Back Button */}
+            <BackButton />
+
             <Text className="text-white text-3xl font-bold mb-4">Enter Your Name</Text>
 
             {/* Input Field (No System Keyboard) */}
