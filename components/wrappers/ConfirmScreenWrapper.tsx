@@ -83,7 +83,7 @@ export default function ConfirmScreenWrapper({ screenType }: ConfirmScreenWrappe
 
             setTimeout(() => {
                 if (screenType === 'client') {
-                    router.push('/(root)/(client)/(main)/clientPhone');  // Navigate to client home
+                    router.push('/(root)/(client)/(main)/clientName');  // Navigate to client home
                 } else if (screenType === 'handler') {
                     router.push('/(root)/(handler)/(main)/handlerDashboard');  // Navigate to handler dashboard
                 }
