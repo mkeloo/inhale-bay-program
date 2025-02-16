@@ -40,7 +40,7 @@ export default function ClientAvatarScreen() {
             setShowCheck(false);
 
             // Navigate to the next screen
-            router.push('/(root)/(admin)/admin');
+            router.push('/(root)/(client)/(main)/clientDashboard');
         }, 1000);
     };
 
