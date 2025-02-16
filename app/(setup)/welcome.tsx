@@ -10,10 +10,10 @@ export default function SetupWelcomeScreen() {
                 <Pressable onPress={() => router.push('/(root)/(admin)/admin')} className='bg-blue-500 p-4 rounded-xl'>
                     <Text className='text-white text-2xl'>Admin Route</Text>
                 </Pressable>
-                <Pressable onPress={() => router.push('/(root)/(client)/client')} className='bg-yellow-500 p-4 rounded-xl'>
+                <Pressable onPress={() => router.push('/(root)/(client)/clientConfirm')} className='bg-yellow-500 p-4 rounded-xl'>
                     <Text className='text-white text-2xl'>Client Route</Text>
                 </Pressable>
-                <Pressable onPress={() => router.push('/(root)/(handler)/handler')} className='bg-red-500 p-4 rounded-xl'>
+                <Pressable onPress={() => router.push('/(root)/(handler)/handlerConfirm')} className='bg-red-500 p-4 rounded-xl'>
                     <Text className='text-white text-2xl'>Handler Route</Text>
                 </Pressable>
             </View>

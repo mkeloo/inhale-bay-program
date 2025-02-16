@@ -2,7 +2,7 @@ import { View, Text, Pressable } from 'react-native'
 import React, { useState } from 'react'
 import { router } from 'expo-router'
 
-export default function ClientHomeScreen() {
+export default function ClientPhoneScreen() {
     return (
         <View className='flex-1 items-center justify-center'>
             <View className='flex items-center justify-center gap-y-4'>

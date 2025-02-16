@@ -82,7 +82,11 @@ export default function ConfirmScreenWrapper({ screenType }: ConfirmScreenWrappe
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); // Haptic success feedback
 
             setTimeout(() => {
-                router.push(`/${screenType}`); // Navigate to the correct screen type
+                if (screenType === 'client') {
+                    router.push('/(root)/(client)/(main)/clientPhone');  // Navigate to client home
+                } else if (screenType === 'handler') {
+                    router.push('/(root)/(handler)/(main)/handlerDashboard');  // Navigate to handler dashboard
+                }
             }, 2000);
         } else {
             showStatusMessage('Incorrect Passcode', true);
