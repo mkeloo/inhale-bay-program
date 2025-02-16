@@ -74,7 +74,7 @@ export default function ClientNameScreen() {
     // Handle Enter
     const handleEnter = () => {
         console.log('Entered:', inputValue);
-        router.push('/(root)/(client)/clientConfirm');
+        router.push('/(root)/(client)/(main)/clientAvatar');
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     };
 
