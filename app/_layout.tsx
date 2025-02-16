@@ -1,14 +1,12 @@
 import { Stack, usePathname } from "expo-router"; // Import usePathname to detect route
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
-import { BackHandler, ToastAndroid, AppState, AppStateStatus, TouchableOpacity } from "react-native";
+import { BackHandler, ToastAndroid, AppState, AppStateStatus, View } from "react-native";
 import * as NavigationBar from "expo-navigation-bar";
 import "../global.css";
 
 export default function RootLayout() {
   const pathname = usePathname(); // Get current route path
-  const [tapCount, setTapCount] = useState(0);
-  const secretTapTarget = 5; // Number of taps required to unlock
 
   useEffect(() => {
     // Hide the navigation bar initially
@@ -58,27 +56,9 @@ export default function RootLayout() {
     };
   }, [pathname]); // Re-run effect if route changes
 
-  // Handle secret tap to unlock navigation bar, but ONLY in /admin route
-  const handleSecretTap = async () => {
-    if (pathname === "/admin") {
-      setTapCount((prevCount) => {
-        const newCount = prevCount + 1;
-
-        if (newCount >= secretTapTarget) {
-          ToastAndroid.show("Admin mode activated! Navigation bar unlocked.", ToastAndroid.SHORT);
-          NavigationBar.setVisibilityAsync("visible"); // Show navigation bar permanently in /admin
-        }
-
-        return newCount;
-      });
-
-      // Reset tap counter after 5 seconds
-      setTimeout(() => setTapCount(0), 5000);
-    }
-  };
 
   return (
-    <TouchableOpacity onPress={handleSecretTap} style={{ flex: 1 }}>
+    <View className="flex-1">
       <StatusBar hidden={true} />
       <Stack
         screenOptions={{
@@ -97,6 +77,6 @@ export default function RootLayout() {
           }}
         />
       </Stack>
-    </TouchableOpacity>
+    </View>
   );
 }
