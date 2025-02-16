@@ -3,10 +3,12 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { BackHandler, ToastAndroid, AppState, AppStateStatus, View } from "react-native";
 import * as NavigationBar from "expo-navigation-bar";
+import { useKeepAwake } from "expo-keep-awake"; // Import KeepAwake
 import "../global.css";
 
 export default function RootLayout() {
   const pathname = usePathname(); // Get current route path
+  useKeepAwake(); // Prevent the screen from sleeping
 
   useEffect(() => {
     // Hide the navigation bar initially
