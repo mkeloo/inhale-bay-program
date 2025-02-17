@@ -114,3 +114,42 @@ export const avatarsImages = [
         image: zebra
     }
 ];
+
+
+export const rewards = [
+    {
+        id: 1,
+        title: 'Bonus',
+        name: '15% off (no tobacco)',
+        reward_type: 'promo',
+        days_left: 7,
+    },
+    {
+        id: 2,
+        title: 'Reward',
+        name: '$5 Reward (no tobacco)',
+        reward_type: 'reward',
+        unlock_points: 100
+    },
+    {
+        id: 3,
+        title: 'Reward',
+        name: '$10 Reward (no tobacco)',
+        reward_type: 'reward',
+        unlock_points: 200
+    },
+    {
+        id: 4,
+        title: 'Reward',
+        name: '$15 Reward (no tobacco)',
+        reward_type: 'reward',
+        unlock_points: 300
+    },
+    {
+        id: 5,
+        title: 'Reward',
+        name: '$20 Reward (no tobacco)',
+        reward_type: 'reward',
+        unlock_points: 400
+    },
+]

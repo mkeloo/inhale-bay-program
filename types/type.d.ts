@@ -9,3 +9,12 @@ export interface ModalProps {
     modalVisible: boolean;
     setModalVisible: (visible: boolean) => void;
 }
+
+export interface RewardCardProps {
+    title: string;
+    rewardName: string;
+    reward_type?: 'reward' | 'promo';
+    unlock_points?: number;
+    days_left?: number;
+    isLocked?: boolean;
+}
