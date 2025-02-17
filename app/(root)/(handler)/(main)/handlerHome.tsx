@@ -11,9 +11,15 @@ export default function HandlerHomeScreen() {
                     <Text className='text-white text-2xl'>Home Route</Text>
                 </Pressable>
 
-                {/* Client Confirm Screen */}
+                {/* Handler Confirm Screen */}
                 <Pressable onPress={() => router.push('/(root)/(handler)/handlerConfirm')} className='bg-cyan-500 p-4 rounded-xl'>
                     <Text className='text-white text-2xl'>Handler Screen</Text>
+                </Pressable>
+
+
+                {/* User Profile */}
+                <Pressable onPress={() => router.push('/(root)/(handler)/(user)/userProfile')} className='bg-purple-500 p-4 rounded-xl'>
+                    <Text className='text-white text-2xl'>User Profile Screen</Text>
                 </Pressable>
             </View>
         </View >

@@ -86,7 +86,7 @@ export default function ConfirmScreenWrapper({ screenType }: ConfirmScreenWrappe
                 if (screenType === 'client') {
                     router.push('/(root)/(client)/(main)/clientName');  // Navigate to client home
                 } else if (screenType === 'handler') {
-                    router.push('/(root)/(handler)/(main)/handlerDashboard');  // Navigate to handler dashboard
+                    router.push('/(root)/(handler)/(main)/handlerHome');  // Navigate to handler dashboard
                 }
             }, 2000);
         } else {
