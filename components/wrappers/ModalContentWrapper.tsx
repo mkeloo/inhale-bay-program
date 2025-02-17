@@ -27,7 +27,7 @@ export default function ModalContentWrapper({
             statusBarTranslucent={true}
             onRequestClose={() => setModalVisible(false)}
         >
-            <View className="flex-1 items-center justify-center">
+            <View className="flex-1 py-6 w-full items-center justify-center ">
                 {/* Blurred Background */}
                 {Platform.OS === "ios" ? (
                     <BlurView intensity={30} className="absolute inset-0" tint="dark" />
@@ -41,7 +41,7 @@ export default function ModalContentWrapper({
                     />
                 )}
                 {/* Modal Content */}
-                <View className="bg-white w-10/12 p-6 pt-12 rounded-2xl items-center relative">
+                <View className="bg-white w-full h-full max-w-3xl p-6 pt-12 rounded-2xl items-center relative">
                     {/* Close Button (Top-Right) */}
                     <Pressable
                         onPress={() => setModalVisible(false)}

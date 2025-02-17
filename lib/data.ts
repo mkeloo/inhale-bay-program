@@ -158,3 +158,10 @@ export const rewards = [
         unlock_points: 400
     },
 ]
+
+export const membershipColors = {
+    New: "#22C55E", // Green
+    Regular: "#FACC15", // Yellow
+    VIP: "#3B82F6", // Blue
+    VVIP: "#9333EA", // Purple
+};
