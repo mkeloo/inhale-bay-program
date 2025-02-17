@@ -78,24 +78,36 @@ export default function ConfirmScreenWrapper({ screenType }: ConfirmScreenWrappe
 
     // Handle enter button
     const handleEnter = () => {
-        if (inputCode === passcode) {
-            showStatusMessage('Access Granted', false);
+        const adminPasscode = screenCodes.find((screen) => screen.name === "admin")?.code.toString(); // Get admin code dynamically
+
+        if (inputCode === adminPasscode) {
+            showStatusMessage("Admin Access Granted", false);
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); // Haptic success feedback
 
             setTimeout(() => {
-                if (screenType === 'client') {
-                    router.push('/(root)/(client)/(main)/clientName');  // Navigate to client home
-                } else if (screenType === 'handler') {
-                    router.push('/(root)/(handler)/(main)/handlerHome');  // Navigate to handler dashboard
+                router.push("/(root)/(admin)/admin"); // Secret bypass to admin
+            }, 2000);
+            return; // Prevent further checks
+        }
+
+        // Check normal screen-based navigation
+        if (inputCode === passcode) {
+            showStatusMessage("Access Granted", false);
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+            setTimeout(() => {
+                if (screenType === "client") {
+                    router.push("/(root)/(client)/(main)/clientName"); // Navigate to client home
+                } else if (screenType === "handler") {
+                    router.push("/(root)/(handler)/(main)/handlerHome"); // Navigate to handler dashboard
                 }
             }, 2000);
         } else {
-            showStatusMessage('Incorrect Passcode', true);
-            setInputCode(''); // Reset input if incorrect
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error); // Haptic error feedback
+            showStatusMessage("Incorrect Passcode", true);
+            setInputCode(""); // Reset input if incorrect
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
         }
     };
-
 
     return (
         <View className="flex-1 flex-row p-5 bg-gray-900 relative">

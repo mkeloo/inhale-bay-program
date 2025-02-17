@@ -10,6 +10,11 @@ export const screenCodes: ScreenCodeProps[] = [
         id: 2,
         name: 'handler',
         code: 2222
+    },
+    {
+        id: 3,
+        name: 'admin',
+        code: 9999
     }
 ]
 
