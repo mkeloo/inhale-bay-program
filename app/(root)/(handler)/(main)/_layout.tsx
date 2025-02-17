@@ -35,19 +35,21 @@ export default function HandlerTabsLayout() {
                 }}
             >
                 <Tabs.Screen
-                    name="handlerHome"
-                    options={{
-                        tabBarIcon: ({ focused }) => <TabIcon Icon={Home} focused={focused} />,
-                        tabBarLabel: "Home",
-                    }}
-                />
-                <Tabs.Screen
                     name="handlerHistory"
                     options={{
                         tabBarIcon: ({ focused }) => <TabIcon Icon={History} focused={focused} />,
                         tabBarLabel: "History",
                     }}
                 />
+
+                <Tabs.Screen
+                    name="handlerHome"
+                    options={{
+                        tabBarIcon: ({ focused }) => <TabIcon Icon={Home} focused={focused} />,
+                        tabBarLabel: "Home",
+                    }}
+                />
+
                 <Tabs.Screen
                     name="handlerSettings"
                     options={{
