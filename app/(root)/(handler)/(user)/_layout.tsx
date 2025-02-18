@@ -7,7 +7,6 @@ import UserProfile from "../(user)/userProfile";
 import UserRewardSelect from "../(user)/userRewardSelect";
 import UserAddReward from "../(user)/userAddReward";
 import UserRewardSummary from "../(user)/userRewardSummary";
-import UserFullProfile from "../(user)/userFullProfile";
 
 const Stack = createStackNavigator();
 
@@ -25,7 +24,6 @@ export default function RootLayout() {
                     <Stack.Screen name="UserRewardSelect" component={UserRewardSelect} />
                     <Stack.Screen name="UserAddReward" component={UserAddReward} />
                     <Stack.Screen name="UserRewardSummary" component={UserRewardSummary} />
-                    {/* <Stack.Screen name="UserFullProfile" component={UserFullProfile} /> */}
                 </Stack.Navigator>
             </View>
         </View>

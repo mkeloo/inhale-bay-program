@@ -7,6 +7,7 @@ export default function RootLayout() {
             <Stack.Screen name="clientName" options={{ headerShown: false }} />
             <Stack.Screen name="clientAvatar" options={{ headerShown: false }} />
             <Stack.Screen name="clientDashboard" options={{ headerShown: false }} />
+            <Stack.Screen name="clientHome" options={{ headerShown: false }} />
         </Stack>
     );
 }
