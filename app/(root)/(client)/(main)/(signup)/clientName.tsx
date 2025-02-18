@@ -10,7 +10,7 @@ export default function ClientNameScreen() {
     const [inputValue, setInputValue] = useState('');
     const deleteInterval = useRef<NodeJS.Timeout | null>(null); // Ref for tracking deletion loop
 
-    const [timer, setTimer] = useState(20);
+    const [timer, setTimer] = useState(10);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -90,13 +90,15 @@ export default function ClientNameScreen() {
 
     // Handle Enter
     const handleEnter = () => {
-        router.push('/(root)/(client)/(main)/(signup)/clientAvatar');
+        // Wrap navigation in setTimeout to defer it until after the render cycle
+        setTimeout(() => {
+            router.push('/(root)/(client)/(main)/(signup)/clientAvatar');
+        }, 0);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     };
 
     return (
         <View className="flex-1 items-center justify-center bg-gray-900 p-5 relative">
-
             {/* Back Button */}
             <BackButton />
 
@@ -165,7 +167,7 @@ export default function ClientNameScreen() {
 
                 {/* Bottom Row: Delete | Space | Enter */}
                 {/* Spacebar - Full Row */}
-                <View className='w-full items-center justify-center'>
+                <View className="w-full items-center justify-center">
                     <View className="w-60 flex-row justify-center">
                         <TouchableOpacity
                             onPress={() => handlePress(' ')}
@@ -201,7 +203,6 @@ export default function ClientNameScreen() {
                     </View>
                 </View>
             </View>
-
         </View>
     );
 }
