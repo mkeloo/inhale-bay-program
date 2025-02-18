@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import { router } from "expo-router";
 
@@ -7,6 +7,22 @@ export default function UserRewardSummary() {
     const earnedPoints = 25; // Example earned points
     const deductedPoints = redeemedReward ? -200 : 0; // Deducted if a reward was redeemed
     const totalPoints = 350; // Example total after calculations
+
+    // Timer state
+    const [timer, setTimer] = useState(10);
+
+    // Effect to start countdown
+    useEffect(() => {
+        if (timer > 0) {
+            const interval = setInterval(() => {
+                setTimer((prev) => prev - 1);
+            }, 1000);
+
+            return () => clearInterval(interval); // Cleanup interval on unmount
+        } else {
+            router.push('/(root)/(handler)/(main)/handlerHome'); // Auto navigate when timer hits 0
+        }
+    }, [timer]);
 
     return (
         <View className="flex-1 items-center justify-center bg-white px-6">
@@ -53,12 +69,13 @@ export default function UserRewardSummary() {
                 </View>
             </View>
 
-            {/* Done Button */}
+            {/* Done Button with Timer */}
             <TouchableOpacity
                 onPress={() => router.push('/(root)/(handler)/(main)/handlerHome')}
-                className="mt-6 w-full max-w-lg bg-green-600 py-4 rounded-lg shadow-lg"
+                className="mt-6 w-full max-w-lg bg-green-600 py-4 rounded-lg shadow-lg flex flex-row items-center justify-center gap-x-2"
             >
                 <Text className="text-white font-bold text-2xl uppercase text-center">Done</Text>
+                <Text className="text-white text-xl font-bold opacity-70">({timer}s)</Text>
             </TouchableOpacity>
         </View>
     );
