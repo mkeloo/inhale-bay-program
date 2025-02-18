@@ -10,10 +10,11 @@ import Animated, {
     withTiming,
 } from 'react-native-reanimated';
 import BackButton from '@/components/shared/BackButton';
+import { Check, CheckCheck } from 'lucide-react-native';
 
 export default function ClientAvatarScreen() {
     const [selectedAvatar, setSelectedAvatar] = useState<number | null>(null);
-    const [showCheck, setShowCheck] = useState(false); // Controls whether to show the check overlay
+    const [showCheck, setShowCheck] = useState(false);
 
     const router = useRouter();
     const scale = useSharedValue(1);
@@ -62,6 +63,31 @@ export default function ClientAvatarScreen() {
 
             {/* Back Button */}
             <BackButton />
+
+            <View className="flex-row items-center justify-center mb-16 gap-x-4">
+                {/* Step 1 - Always Checked */}
+                <View className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+                    <Check size={24} color="black" />
+                </View>
+                <View className="w-12 h-1 bg-white" />
+
+                {/* Step 2 - Checked */}
+                <View className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+                    <Check size={24} color="black" />
+                </View>
+                <View className="w-12 h-1 bg-white" />
+
+                {/* Step 3 - Active */}
+                <View className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+                    <Text className="text-black text-xl font-bold">3</Text>
+                </View>
+                <View className="w-12 h-1 bg-white" />
+
+                {/* Final Destination */}
+                <View className="w-10 h-10 rounded-full bg-green-400 flex items-center justify-center">
+                    <CheckCheck size={24} color="white" />
+                </View>
+            </View>
 
 
             <Text className="text-white text-3xl font-bold mb-6">Select Your Avatar</Text>

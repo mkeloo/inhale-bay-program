@@ -3,8 +3,11 @@ import React, { useState } from "react";
 import { router } from "expo-router";
 import { X, BadgeCheck } from "lucide-react-native";
 
+const dummyPhoneNumber = "0000000000";
+
 export default function ClientPhoneScreen() {
     const [phoneNumber, setPhoneNumber] = useState("");
+
 
     // Handle number input
     const handlePress = (num: string) => {
@@ -19,11 +22,15 @@ export default function ClientPhoneScreen() {
     // Handle enter
     const handleEnter = () => {
         if (phoneNumber.length === 10) {
-            // Navigate based on phone number validation
-            router.push("/(root)/(client)/(main)/clientName");
+            if (phoneNumber === dummyPhoneNumber) {
+                // If phone exists, go straight to the dashboard
+                router.push("/(root)/(client)/(main)/clientDashboard");
+            } else {
+                // If new phone, continue signup process
+                router.push("/(root)/(client)/(main)/(signup)/clientName");
+            }
         }
     };
-
     const formatPhoneNumber = (number: string) => {
         if (number.length <= 3) return `(${number}`;
         if (number.length <= 6) return `(${number.slice(0, 3)}) ${number.slice(3)}`;
@@ -35,7 +42,7 @@ export default function ClientPhoneScreen() {
             {/* Left Side - Placeholder Image */}
             <View className="w-1/2">
                 <Image
-                    source={require("../../../../assets/images/screen/home/home.jpg")}
+                    source={require("../../../../../assets/images/screen/home/home.jpg")}
                     className="w-full h-full object-cover"
                     resizeMode="cover"
                 />
