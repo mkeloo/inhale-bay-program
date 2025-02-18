@@ -1,5 +1,5 @@
 import { View, Text, Pressable } from 'react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { router } from 'expo-router';
 import BatteryStatus from '@/components/shared/BatteryLevel';
 import WifiStrengthChecker from '@/components/shared/CheckWifi';
@@ -12,7 +12,7 @@ export default function SetupWelcomeScreen() {
             {/* 🔋 Battery Status Display */}
             <BatteryStatus />
 
-            {/* WiFi Strength Checker */}
+            {/* 📶 WiFi Strength Checker */}
             <WifiStrengthChecker />
 
             <View className="flex items-center justify-center gap-y-4">

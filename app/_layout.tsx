@@ -4,11 +4,18 @@ import { useEffect } from "react";
 import { BackHandler, ToastAndroid, AppState, AppStateStatus, View, Platform } from "react-native";
 import * as NavigationBar from "expo-navigation-bar";
 import { useKeepAwake } from "expo-keep-awake"; // Prevent screen sleep
+import * as ScreenOrientation from "expo-screen-orientation"; // Import Screen Orientation API
 import "../global.css";
 
 export default function RootLayout() {
   const pathname = usePathname(); // Get current route path
   useKeepAwake(); // Prevent screen sleep
+
+  // 🔹 Lock screen orientation to LANDSCAPE RIGHT
+  const lockScreenOrientation = async () => {
+    await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT);
+  };
+  lockScreenOrientation();
 
   useEffect(() => {
     // Only apply navigation blocking for Android
