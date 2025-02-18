@@ -10,7 +10,7 @@ export default function ClientNameScreen() {
     const [inputValue, setInputValue] = useState('');
     const deleteInterval = useRef<NodeJS.Timeout | null>(null); // Ref for tracking deletion loop
 
-    const [timer, setTimer] = useState(1000);
+    const [timer, setTimer] = useState(20);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -90,7 +90,6 @@ export default function ClientNameScreen() {
 
     // Handle Enter
     const handleEnter = () => {
-        console.log('Entered:', inputValue);
         router.push('/(root)/(client)/(main)/(signup)/clientAvatar');
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     };
