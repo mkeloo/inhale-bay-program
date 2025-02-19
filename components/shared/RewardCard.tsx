@@ -24,7 +24,7 @@ export default function RewardCard({
     const glowOpacity = useSharedValue(0.3);
 
     // Glow color based on reward type
-    const glowColor = reward_type === 'promo' ? 'rgba(34, 197, 94, 1)' : 'rgba(79, 70, 229, 1)';
+    const glowColor = reward_type === 'promo' ? 'rgba(34, 197, 94, 0.35)' : 'rgba(79, 70, 229, 0.35)';
 
     useEffect(() => {
         // One-time bounce effect on mount
@@ -58,7 +58,7 @@ export default function RewardCard({
 
     return (
         <Animated.View
-            className="h-full w-[240px] max-h-[275px] flex px-3 py-4 gap-y-3 rounded-3xl items-center justify-between"
+            className="h-full w-[240px] max-h-[280px] flex px-3 py-4 gap-y-3 rounded-3xl items-center justify-between"
             style={[
                 cardAnimatedStyle,
                 glowAnimatedStyle,

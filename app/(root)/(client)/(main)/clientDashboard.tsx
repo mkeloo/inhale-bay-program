@@ -1,20 +1,21 @@
-import { View, Text, Image, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, Image, FlatList } from 'react-native';
 import React from 'react';
 import { router } from 'expo-router';
 import BackButton from '@/components/shared/BackButton';
 import RewardCard from '@/components/shared/RewardCard';
 import { rewards } from '@/lib/data';
+import TimerButton from '@/components/client/TimerButton';
 
 const currentUser = {
     id: 1,
     name: 'John Doe',
     phone_number: '1234567890',
-    current_points: 130,
+    current_points: 100,
 };
 
 export default function ClientDashboardScreen() {
     return (
-        <View className="flex-1 py-16">
+        <View className="flex-1 py-20 bg-blue-100">
             {/* Back Button */}
             <BackButton />
 
@@ -33,10 +34,11 @@ export default function ClientDashboardScreen() {
                     <Image source={require('../../../../assets/images/screen/reward/coin.png')} className="w-10 h-10" />
                     <Text className="font-bold text-2xl text-gray-100">{currentUser.current_points}</Text>
                 </View>
+
             </View>
 
             {/* Rewards Section */}
-            <View className="mt-6 px-10 w-full flex items-center justify-center">
+            <View className="mt-6  w-full h-4/5 flex items-center justify-center">
                 <View className="my-4">
                     <Text className="text-6xl font-bold text-gray-900 px-5 py-4">
                         {(() => {
@@ -58,7 +60,7 @@ export default function ClientDashboardScreen() {
                     keyExtractor={(item) => item.id.toString()}
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    contentContainerClassName="items-center justify-center px-10 gap-x-4 pt-10"
+                    contentContainerClassName="flex items-center justify-center px-20 gap-x-8 pt-20"
                     renderItem={({ item }) => {
                         const isLocked =
                             item.reward_type !== 'promo' &&
@@ -81,6 +83,15 @@ export default function ClientDashboardScreen() {
                         );
                     }}
                 />
+
+
+
+
+            </View>
+
+            {/* Timer Button */}
+            <View className='w-full h-1/5 flex items-center justify-start'>
+                <TimerButton duration={25} />
             </View>
         </View>
     );
