@@ -5,17 +5,28 @@ import { BackHandler, ToastAndroid, AppState, AppStateStatus, View, Platform } f
 import * as NavigationBar from "expo-navigation-bar";
 import { useKeepAwake } from "expo-keep-awake"; // Prevent screen sleep
 import * as ScreenOrientation from "expo-screen-orientation"; // Import Screen Orientation API
+import { initStorage } from '@/lib/asyncStorage';
 import "../global.css";
+// import { resetStorage } from '@/lib/asyncStorage';
+
 
 export default function RootLayout() {
   const pathname = usePathname(); // Get current route path
   useKeepAwake(); // Prevent screen sleep
+
+  // resetStorage(); // Uncomment to reset AsyncStorage on app startup
 
   // 🔹 Lock screen orientation to LANDSCAPE RIGHT
   const lockScreenOrientation = async () => {
     await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT);
   };
   lockScreenOrientation();
+
+  // 🔹 Initialize AsyncStorage on app startup
+  useEffect(() => {
+    initStorage();
+  }, []);
+
 
   useEffect(() => {
     // Only apply navigation blocking for Android

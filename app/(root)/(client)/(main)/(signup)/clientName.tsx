@@ -3,9 +3,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Eraser, Space } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import BackButton from '@/components/shared/BackButton';
 import Stepper from '@/components/client/Stepper';
+import ClientNameInput from '@/components/client/ClientNameInput';
 
 export default function ClientNameScreen() {
     const [inputValue, setInputValue] = useState('');
@@ -46,7 +47,14 @@ export default function ClientNameScreen() {
 
     // Handle Key Press
     const handlePress = (char: string) => {
-        setInputValue((prev) => prev + char);
+        setInputValue((prev) => {
+            const formatted = prev + char;
+            return formatted
+                .split(' ') // Split into words
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize first letter
+                .join(' '); // Join back into string
+        });
+
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
         // Trigger animation when text is added
@@ -113,18 +121,13 @@ export default function ClientNameScreen() {
                 <Text className="text-white text-6xl font-bold">Enter Your Name</Text>
             </View>
 
-            {/* Input Field (No System Keyboard) */}
-            <View className='w-full h-[20%] flex items-center justify-center gap-y-2 '>
-                <TouchableOpacity activeOpacity={1} className="w-[60%] px-3 py-5 bg-gray-800 rounded-lg">
-                    <Animated.View style={animatedStyle}>
-                        <TextInput
-                            value={inputValue}
-                            editable={false} // Prevent system keyboard
-                            className="text-white text-2xl text-center"
-                        />
-                    </Animated.View>
-                </TouchableOpacity>
-            </View>
+
+            {/* Refactored Name Input Field with Predictive Text */}
+            <ClientNameInput
+                inputValue={inputValue}
+                setInputValue={setInputValue}
+                animatedStyle={animatedStyle}
+            />
 
             {/* Keyboard Layout */}
             <View className="w-full h-[60%] flex items-center justify-start pt-12 ">
