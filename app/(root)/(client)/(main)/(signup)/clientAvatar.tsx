@@ -10,7 +10,7 @@ import Animated, {
     withTiming,
 } from 'react-native-reanimated';
 import BackButton from '@/components/shared/BackButton';
-import { Check, CheckCheck } from 'lucide-react-native';
+import Stepper from '@/components/client/Stepper';
 
 export default function ClientAvatarScreen() {
     const [selectedAvatar, setSelectedAvatar] = useState<number | null>(null);
@@ -92,26 +92,8 @@ export default function ClientAvatarScreen() {
         <ScrollView contentContainerClassName="relative flex h-full items-center justify-center bg-gray-900 py-10 pb-32">
             <BackButton />
 
-            <View className="flex-row items-center justify-center mb-16 gap-x-4">
-                <View className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
-                    <Check size={24} color="black" />
-                </View>
-                <View className="w-12 h-1 bg-white" />
-
-                <View className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
-                    <Check size={24} color="black" />
-                </View>
-                <View className="w-12 h-1 bg-white" />
-
-                <View className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
-                    <Text className="text-black text-xl font-bold">3</Text>
-                </View>
-                <View className="w-12 h-1 bg-white" />
-
-                <View className="w-10 h-10 rounded-full bg-green-400 flex items-center justify-center">
-                    <CheckCheck size={24} color="white" />
-                </View>
-            </View>
+            {/* Stepper - Static UI */}
+            <Stepper type='avatar' />
 
             <Text className="text-white text-4xl font-bold mb-4">Select Your Avatar</Text>
 
@@ -141,8 +123,8 @@ export default function ClientAvatarScreen() {
                             key={avatar.id}
                             onPress={() => handleAvatarSelect(avatar.id)}
                             className={`p-2 rounded-2xl border-4 ${selectedAvatar === avatar.id
-                                    ? 'border-yellow-800 bg-amber-400'
-                                    : 'border-gray-900'
+                                ? 'border-yellow-800 bg-amber-400'
+                                : 'border-gray-900'
                                 }`}
                             style={{ width: '11%', aspectRatio: 1, alignItems: 'center' }}
                         >

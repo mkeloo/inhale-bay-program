@@ -1,16 +1,17 @@
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
-import { Eraser, Space, Check, MapPin, CheckCheck } from 'lucide-react-native';
+import { Eraser, Space } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import BackButton from '@/components/shared/BackButton';
+import Stepper from '@/components/client/Stepper';
 
 export default function ClientNameScreen() {
     const [inputValue, setInputValue] = useState('');
     const deleteInterval = useRef<NodeJS.Timeout | null>(null); // Ref for tracking deletion loop
 
-    const [timer, setTimer] = useState(10);
+    const [timer, setTimer] = useState(500);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -92,7 +93,9 @@ export default function ClientNameScreen() {
     const handleEnter = () => {
         // Wrap navigation in setTimeout to defer it until after the render cycle
         setTimeout(() => {
-            router.push('/(root)/(client)/(main)/(signup)/clientAvatar');
+            // router.push('/(root)/(client)/(main)/(signup)/clientAvatar');
+            router.push('/welcome');
+
         }, 0);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     };
@@ -102,64 +105,46 @@ export default function ClientNameScreen() {
             {/* Back Button */}
             <BackButton />
 
-            {/* Stepper - Static UI */}
-            <View className="flex-row items-center justify-center mb-10 gap-x-4">
-                {/* Step 1 - Always Checked */}
-                <View className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
-                    <Check size={24} color="black" />
-                </View>
-                <View className="w-12 h-1 bg-white" />
+            <View className='w-full h-[20%] flex items-center justify-center pt-6'>
+                {/* Stepper - Static UI */}
+                <Stepper type='name' />
 
-                {/* Step 2 - Active Step */}
-                <View className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
-                    <Text className="text-black text-xl font-bold">2</Text>
-                </View>
-                <View className="w-12 h-1 bg-white" />
 
-                {/* Step 3 - Inactive */}
-                <View className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center">
-                    <Text className="text-gray-400 text-xl font-bold">3</Text>
-                </View>
-                <View className="w-12 h-1 bg-white" />
-
-                {/* Final Destination */}
-                <View className="w-10 h-10 rounded-full bg-green-400 flex items-center justify-center">
-                    <CheckCheck size={24} color="white" />
-                </View>
+                <Text className="text-white text-6xl font-bold">Enter Your Name</Text>
             </View>
 
-            <Text className="text-white text-5xl font-bold mb-4">Enter Your Name</Text>
-
             {/* Input Field (No System Keyboard) */}
-            <TouchableOpacity activeOpacity={1} className="w-[60%] p-3 bg-gray-800 rounded-lg">
-                <Animated.View style={animatedStyle}>
-                    <TextInput
-                        value={inputValue}
-                        editable={false} // Prevent system keyboard
-                        className="text-white text-2xl text-center"
-                    />
-                </Animated.View>
-            </TouchableOpacity>
+            <View className='w-full h-[20%] flex items-center justify-center gap-y-2 '>
+                <TouchableOpacity activeOpacity={1} className="w-[60%] px-3 py-5 bg-gray-800 rounded-lg">
+                    <Animated.View style={animatedStyle}>
+                        <TextInput
+                            value={inputValue}
+                            editable={false} // Prevent system keyboard
+                            className="text-white text-2xl text-center"
+                        />
+                    </Animated.View>
+                </TouchableOpacity>
+            </View>
 
             {/* Keyboard Layout */}
-            <View className="mt-6 items-center">
+            <View className="w-full h-[60%] flex items-center justify-start pt-12 ">
                 {qwertyRows.map((row, rowIndex) => (
                     <View
                         key={rowIndex}
-                        className="flex-row mb-3"
+                        className="flex-row mb-1.5"
                         style={{
                             justifyContent: 'center',
                             gap: 8, // Space between keys
-                            marginLeft: rowIndex === 1 ? 20 : rowIndex === 2 ? 40 : 0, // Shift rows for correct alignment
+                            marginLeft: rowIndex === 10 ? 30 : rowIndex === 2 ? -65 : 0, // Shift rows for correct alignment
                         }}
                     >
                         {row.map((char) => (
                             <TouchableOpacity
                                 key={char}
                                 onPress={() => handlePress(char)}
-                                className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center active:scale-95 transition-transform"
+                                className="w-[70px] h-[70px] bg-blue-600 rounded-lg flex items-center justify-center active:scale-95 transition-transform"
                             >
-                                <Text className="text-2xl font-bold text-white">{char}</Text>
+                                <Text className="text-[40px] font-bold text-white">{char}</Text>
                             </TouchableOpacity>
                         ))}
                     </View>
@@ -171,11 +156,11 @@ export default function ClientNameScreen() {
                     <View className="w-60 flex-row justify-center">
                         <TouchableOpacity
                             onPress={() => handlePress(' ')}
-                            className="w-3/4 h-12 bg-blue-600 rounded-lg flex items-center justify-center active:scale-95 transition-transform"
+                            className="w-full h-[60px] bg-blue-600 rounded-lg flex items-center justify-center active:scale-95 transition-transform"
                         >
-                            <Text className="text-2xl font-bold text-white">
-                                <Space size={30} color="white" />
-                            </Text>
+                            <View className="flex items-center justify-center pb-6">
+                                <Space size={55} color="white" />
+                            </View>
                         </TouchableOpacity>
                     </View>
 
@@ -186,19 +171,19 @@ export default function ClientNameScreen() {
                             onPress={handleSingleDelete}
                             onPressIn={startDeleting}
                             onPressOut={stopDeleting}
-                            className="flex-1 h-16 bg-red-600 rounded-lg flex-row items-center justify-center active:scale-95 transition-transform"
+                            className="flex-1 h-20 bg-red-600 rounded-lg flex-row items-center justify-center active:scale-95 transition-transform"
                         >
                             <Eraser size={30} color="white" />
-                            <Text className="text-white font-bold text-2xl uppercase text-center ml-2">Delete</Text>
+                            <Text className="text-white font-bold text-3xl uppercase text-center ml-2">Delete</Text>
                         </TouchableOpacity>
 
                         {/* Submit Button */}
                         <TouchableOpacity
                             onPress={handleEnter}
-                            className="flex-1 h-16 bg-green-600 rounded-lg flex-row items-center justify-center gap-x-3"
+                            className="flex-1 h-20 bg-green-600 rounded-lg flex-row items-center justify-center gap-x-3"
                         >
-                            <Text className="text-white font-bold text-2xl uppercase text-center">Submit</Text>
-                            <Text className="text-white text-xl font-bold opacity-70">({timer}s)</Text>
+                            <Text className="text-white font-bold text-3xl uppercase text-center">Submit</Text>
+                            <Text className="text-white text-2xl font-bold opacity-70">({timer}s)</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
