@@ -47,16 +47,21 @@ export const insertName = async (name: string) => {
 // Search for names based on input
 export const searchNames = async (query: string, callback: (results: string[]) => void) => {
     try {
+        if (!query.trim()) { // If input is empty, return no predictions
+            callback([]);
+            return;
+        }
+
         const storedData = await AsyncStorage.getItem(STORAGE_KEY);
         let allNames = storedData ? JSON.parse(storedData) : [];
 
         // Remove duplicates
         allNames = [...new Set(allNames)];
 
-        // Optionally show all names or a subset when query is empty
-        const filteredNames = query
-            ? allNames.filter((name: string) => name.toLowerCase().startsWith(query.toLowerCase())).slice(0, 5)
-            : allNames.slice(0, 7);
+        // Filter names that match the input query
+        const filteredNames = allNames
+            .filter((name: string) => name.toLowerCase().startsWith(query.toLowerCase()))
+            .slice(0, 5); // Limit to 5 results
 
         callback(filteredNames);
     } catch (error) {
