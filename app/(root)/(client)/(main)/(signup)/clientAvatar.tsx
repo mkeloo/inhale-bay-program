@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView, FlatList } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { avatarsImages } from '@/lib/data';
 import * as Haptics from 'expo-haptics';
@@ -27,16 +27,13 @@ export default function ClientAvatarScreen() {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
         // Trigger a brief scale-up animation on the selected avatar
-        scale.value = withSpring(1.1, { damping: 5, stiffness: 100 });
+        scale.value = withSpring(1.35, { damping: 5, stiffness: 100 });
         setTimeout(() => {
             scale.value = withSpring(1);
         }, 200);
     };
 
-    const getAvatarStyle = (thisAvatarId: number) =>
-        useAnimatedStyle(() => ({
-            transform: [{ scale: thisAvatarId === selectedAvatar ? scale.value : 1 }],
-        }));
+
 
     const checkOverlayStyle = useAnimatedStyle(() => ({
         transform: [{ scale: checkScale.value }],
@@ -88,62 +85,83 @@ export default function ClientAvatarScreen() {
         }, 600);
     };
 
+    // Precompute animation styles at the top of the component
+    const animatedStyles = avatarsImages.reduce((acc, avatar) => {
+        acc[avatar.id] = useAnimatedStyle(() => ({
+            transform: [{ scale: avatar.id === selectedAvatar ? scale.value : 1 }],
+        }));
+        return acc;
+    }, {} as Record<number, any>);
+
     return (
-        <ScrollView contentContainerClassName="relative flex h-full items-center justify-center bg-gray-900 py-10 pb-32">
+        <View className="relative flex h-full items-center justify-center bg-gray-900 ">
             <BackButton />
 
-            {/* Stepper - Static UI */}
-            <Stepper type='avatar' />
+            <View className='w-full h-[30%] flex items-center justify-center  pt-6'>
+                {/* Stepper - Static UI */}
+                <Stepper type='avatar' />
 
-            <Text className="text-white text-4xl font-bold mb-4">Select Your Avatar</Text>
 
-            <TouchableOpacity
-                onPress={handleSubmit}
-                disabled={!selectedAvatar}
-                className={`mb-10 px-6 py-4 rounded-xl flex-row items-center justify-center gap-x-3 w-full max-w-sm ${selectedAvatar ? 'bg-green-600' : 'bg-gray-500 opacity-50'
-                    }`}
-            >
-                <Text className="text-white font-bold text-2xl uppercase text-center">Submit</Text>
-                <Text className="text-white text-xl font-bold opacity-70">({timer}s)</Text>
-            </TouchableOpacity>
+                <Text className="text-white text-6xl font-bold">Choose Your Avatar</Text>
+            </View>
 
-            <View
-                style={{
-                    flexDirection: 'row',
-                    flexWrap: 'wrap',
-                    justifyContent: 'center',
-                    gap: 6,
-                    width: '95%',
-                }}
-            >
-                {avatarsImages.map((avatar) => {
-                    const animatedStyle = getAvatarStyle(avatar.id);
-                    return (
-                        <TouchableOpacity
-                            key={avatar.id}
-                            onPress={() => handleAvatarSelect(avatar.id)}
-                            className={`p-2 rounded-2xl border-4 ${selectedAvatar === avatar.id
-                                ? 'border-yellow-800 bg-amber-400'
-                                : 'border-gray-900'
-                                }`}
-                            style={{ width: '11%', aspectRatio: 1, alignItems: 'center' }}
-                        >
-                            <Animated.View style={animatedStyle}>
-                                <Image
-                                    source={avatar.image}
-                                    className="w-24 h-24 rounded-lg"
-                                    resizeMode="contain"
-                                />
-                            </Animated.View>
-                            <Text
-                                className={`text-center font-bold mt-2 text-lg ${selectedAvatar === avatar.id ? 'text-black' : 'text-white'
+
+
+            {/*   Avatar Grid    */}
+            <View className="h-[50%] w-full items-center justify-center bg-opacity-50">
+                <FlatList
+                    data={avatarsImages}
+                    keyExtractor={(item) => item.id.toString()}
+                    numColumns={8} // 8 columns for the grid
+                    // contentContainerStyle={{ justifyContent: 'center', alignItems: 'center' }}
+                    contentContainerClassName='flex items-center justify-center gap-y-10 '
+                    renderItem={({ item }) => {
+                        const animatedStyle = animatedStyles[item.id]; // Use stored animation styles
+                        return (
+                            <TouchableOpacity
+                                key={item.id}
+                                onPress={() => handleAvatarSelect(item.id)}
+                                className={`p-2  mx-1.5 rounded-2xl border-4 ${selectedAvatar === item.id ? 'border-yellow-800 bg-amber-400' : 'border-gray-900'
                                     }`}
+                                style={[
+                                    {
+                                        width: '11%',
+                                        alignItems: 'center',
+                                        height: '100%',
+                                    },
+                                    animatedStyle, // Apply scaling effect
+                                ]}
                             >
-                                {avatar.name}
-                            </Text>
-                        </TouchableOpacity>
-                    );
-                })}
+                                <Animated.View style={animatedStyle}>
+                                    <Image
+                                        source={item.image}
+                                        className="w-[100px] h-[100px] rounded-2xl"
+                                        resizeMode="contain"
+                                    />
+                                </Animated.View>
+                                <Text
+                                    className={`text-center font-bold mt-2 text-lg ${selectedAvatar === item.id ? 'text-black' : 'text-white'
+                                        }`}
+                                >
+                                    {item.name}
+                                </Text>
+                            </TouchableOpacity>
+                        );
+                    }}
+                />
+            </View>
+
+            {/* Timer Submit Button */}
+            <View className="w-full h-[20%] flex items-center justify-start">
+                <TouchableOpacity
+                    onPress={handleSubmit}
+                    disabled={!selectedAvatar}
+                    className={` px-6 py-6 rounded-xl flex-row items-center justify-center gap-x-3 w-full max-w-sm ${selectedAvatar ? 'bg-green-600' : 'bg-gray-500 opacity-50'
+                        }`}
+                >
+                    <Text className="text-white font-bold text-3xl uppercase text-center">Submit</Text>
+                    <Text className="text-white text-2xl font-bold opacity-70">({timer}s)</Text>
+                </TouchableOpacity>
             </View>
 
             {showCheck && (
@@ -153,6 +171,6 @@ export default function ClientAvatarScreen() {
                     </Animated.View>
                 </View>
             )}
-        </ScrollView>
+        </View>
     );
 }

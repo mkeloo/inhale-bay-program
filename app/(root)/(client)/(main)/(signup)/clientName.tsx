@@ -101,8 +101,8 @@ export default function ClientNameScreen() {
     const handleEnter = () => {
         // Wrap navigation in setTimeout to defer it until after the render cycle
         setTimeout(() => {
-            // router.push('/(root)/(client)/(main)/(signup)/clientAvatar');
-            router.push('/welcome');
+            router.push('/(root)/(client)/(main)/(signup)/clientAvatar');
+            // router.push('/welcome');
 
         }, 0);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
