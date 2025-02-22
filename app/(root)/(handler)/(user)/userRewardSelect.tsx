@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, TouchableOpacity, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { LockKeyhole, Check } from "lucide-react-native";
-import { rewards } from "@/lib/data"; // Assuming rewards are stored here
+import { fetchRewards, Reward } from '@/utils/actions';
 
 // Example User Points (This will be fetched from state or backend in real use)
 const currentUser = {
@@ -17,6 +17,17 @@ type RootStackParamList = {
 export default function UserRewardSelect() {
     const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
     const [selectedReward, setSelectedReward] = useState<number | null>(null);
+    const [rewards, setRewards] = useState<Reward[]>([]);
+
+    // Fetch rewards from Supabase on component mount
+    useEffect(() => {
+        const loadRewards = async () => {
+            const fetchedRewards = await fetchRewards();
+            setRewards(fetchedRewards);
+        };
+
+        loadRewards();
+    }, []);
 
     return (
         <View className="w-full flex-1 items-center justify-center bg-white px-6 py-16">
@@ -34,7 +45,7 @@ export default function UserRewardSelect() {
                         const isLocked =
                             item.reward_type !== "promo" &&
                             item.unlock_points !== undefined &&
-                            currentUser.current_points < item.unlock_points;
+                            item.unlock_points !== null && currentUser.current_points < item.unlock_points;
 
                         return (
                             <TouchableOpacity
@@ -44,7 +55,7 @@ export default function UserRewardSelect() {
                                     } px-4 py-4 rounded-2xl ${isLocked ? "opacity-50 brightness-75" : "bg-white"}`}
                             >
                                 <View className="items-center gap-y-1">
-                                    <Text className="text-2xl font-bold text-black">{item.name}</Text>
+                                    <Text className="text-2xl font-bold text-black">{item.reward_name}</Text>
                                     {item.reward_type === "promo" ? (
                                         <Text className="w-full text-green-600 text-xl font-bold">
                                             Promo ({item.days_left} days left)
