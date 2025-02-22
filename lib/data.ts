@@ -15,6 +15,11 @@ export const screenCodes: ScreenCodeProps[] = [
         id: 3,
         name: 'admin',
         code: 9999
+    },
+    {
+        id: 4,
+        name: 'bypass_code',
+        code: 555555
     }
 ]
 

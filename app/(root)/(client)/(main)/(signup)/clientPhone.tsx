@@ -3,6 +3,7 @@ import React, { useState, useRef } from 'react';
 import { router } from 'expo-router';
 import { X, BadgeCheck } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
+import { screenCodes } from '@/lib/data';
 
 const dummyPhoneNumber = "0000000000";
 
@@ -10,13 +11,23 @@ export default function ClientPhoneScreen() {
     const [phoneNumber, setPhoneNumber] = useState("");
     const deleteInterval = useRef<NodeJS.Timeout | null>(null);
 
-    // Handle number input with light haptic feedback
+    // Handle number input with light haptic feedback and secret logic for "555555"
     const handlePress = (num: string) => {
-        setPhoneNumber((prev) => (prev.length < 10 ? prev + num : prev));
+        setPhoneNumber((prev) => {
+            if (prev.length >= 10) return prev;
+            const newPhone = prev + num;
+            // If the secret code is being entered, check if the first six digits are "555555"
+            if (newPhone.length === 6 && newPhone === screenCodes.find((code) => code.name === "bypass_code")?.code.toString()) {
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                router.push("/welcome");
+                return ""; // Optionally reset phone number
+            }
+            return newPhone;
+        });
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     };
 
-    // Single tap delete with medium haptic feedback
+    // Handle delete button (single tap)
     const handleDelete = () => {
         setPhoneNumber((prev) => prev.slice(0, -1));
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -46,7 +57,7 @@ export default function ClientPhoneScreen() {
         }
     };
 
-    // Handle enter / submit with success haptics
+    // Handle enter (submit)
     const handleEnter = () => {
         if (phoneNumber.length === 10) {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -94,7 +105,7 @@ export default function ClientPhoneScreen() {
                         className={`text-3xl font-bold tracking-widest text-center ${phoneNumber.length > 0 ? "text-white" : "text-gray-500"
                             }`}
                         keyboardType="number-pad"
-                        editable={false} // Prevent manual typing; use keypad
+                        editable={false} // Prevent manual input; use keypad
                     />
                 </View>
 
@@ -105,19 +116,14 @@ export default function ClientPhoneScreen() {
                             key={num}
                             onPress={() => handlePress(num.toString())}
                             onLongPress={
-                                num === 5
+                                num === 8
                                     ? () => {
                                         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                                        router.push("/welcome");
+                                        router.push("/(root)/(admin)/admin");
                                     }
-                                    : num === 8
-                                        ? () => {
-                                            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                                            router.push("/(root)/(admin)/admin");
-                                        }
-                                        : undefined
+                                    : undefined
                             }
-                            delayLongPress={num === 5 || num === 8 ? 7000 : 500}
+                            delayLongPress={num === 8 ? 7000 : 500}
                             className="w-20 h-20 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg"
                         >
                             <Text className="text-3xl font-bold text-white">{num}</Text>
