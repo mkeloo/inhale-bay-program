@@ -91,7 +91,11 @@ export default function ClientDashboardScreen() {
 
             {/* Timer Button */}
             <View className='w-full h-1/5 flex items-center justify-start'>
-                <TimerButton duration={25} />
+                <TimerButton
+                    title="Done"
+                    route="/(root)/(client)/(main)/(signup)/clientPhone"
+                    duration={10}
+                />
             </View>
         </View>
     );

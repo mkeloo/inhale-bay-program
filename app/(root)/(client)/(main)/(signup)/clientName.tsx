@@ -10,29 +10,34 @@ import ClientNameInput from '@/components/client/ClientNameInput';
 
 export default function ClientNameScreen() {
     const [inputValue, setInputValue] = useState('');
-    const deleteInterval = useRef<NodeJS.Timeout | null>(null); // Ref for tracking deletion loop
+    const deleteInterval = useRef<NodeJS.Timeout | null>(null); // For deletion loop
+    const [timer, setTimer] = useState(15);
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-    const [timer, setTimer] = useState(500);
-
+    // Start countdown timer and store in intervalRef
     useEffect(() => {
-        const interval = setInterval(() => {
+        intervalRef.current = setInterval(() => {
             setTimer((prev) => {
                 if (prev === 1) {
-                    clearInterval(interval);
+                    if (intervalRef.current) {
+                        clearInterval(intervalRef.current);
+                        intervalRef.current = null;
+                    }
                     handleEnter(); // Auto-submit when timer reaches 0
                 }
                 return prev - 1;
             });
         }, 1000);
 
-        return () => clearInterval(interval);
+        return () => {
+            if (intervalRef.current) clearInterval(intervalRef.current);
+        };
     }, []);
 
     // Animation values for input scaling and opacity
     const scale = useSharedValue(1);
     const opacity = useSharedValue(0.5);
 
-    // Reanimated styles
     const animatedStyle = useAnimatedStyle(() => ({
         transform: [{ scale: scale.value }],
         opacity: opacity.value,
@@ -45,19 +50,18 @@ export default function ClientNameScreen() {
         ['Z', 'X', 'C', 'V', 'B', 'N', 'M'],
     ];
 
-    // Handle Key Press
+    // Handle key press
     const handlePress = (char: string) => {
         setInputValue((prev) => {
             const formatted = prev + char;
             return formatted
-                .split(' ') // Split into words
-                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize first letter
-                .join(' '); // Join back into string
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                .join(' ');
         });
 
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-        // Trigger animation when text is added
         scale.value = withTiming(1.05, { duration: 200 });
         opacity.value = withTiming(1, { duration: 200 });
 
@@ -66,15 +70,14 @@ export default function ClientNameScreen() {
         }, 200);
     };
 
-    // 🔹 Single Tap Delete
+    // Single tap delete
     const handleSingleDelete = () => {
         setInputValue((prev) => prev.slice(0, -1));
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     };
 
-    // 🔹 Start Holding to Delete
+    // Start holding to delete
     const startDeleting = () => {
-        // Wait 300ms before starting repeat delete
         deleteInterval.current = setTimeout(() => {
             deleteInterval.current = setInterval(() => {
                 setInputValue((prev) => {
@@ -85,11 +88,11 @@ export default function ClientNameScreen() {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                     return prev.slice(0, -1);
                 });
-            }, 100); // Deletes every 100ms
-        }, 300); // Initial delay to prevent instant double delete
+            }, 100);
+        }, 300);
     };
 
-    // 🔹 Stop Holding
+    // Stop holding delete
     const stopDeleting = () => {
         if (deleteInterval.current) {
             clearInterval(deleteInterval.current);
@@ -97,13 +100,14 @@ export default function ClientNameScreen() {
         }
     };
 
-    // Handle Enter
+    // Handle Enter (Submit)
     const handleEnter = () => {
-        // Wrap navigation in setTimeout to defer it until after the render cycle
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
         setTimeout(() => {
             router.push('/(root)/(client)/(main)/(signup)/clientAvatar');
-            // router.push('/welcome');
-
         }, 0);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     };
@@ -113,16 +117,13 @@ export default function ClientNameScreen() {
             {/* Back Button */}
             <BackButton />
 
-            <View className='w-full h-[20%] flex items-center justify-center pt-6'>
+            <View className="w-full h-[20%] flex items-center justify-center pt-6">
                 {/* Stepper - Static UI */}
-                <Stepper type='name' />
-
-
+                <Stepper type="name" />
                 <Text className="text-white text-6xl font-bold">Enter Your Name</Text>
             </View>
 
-
-            {/* Refactored Name Input Field with Predictive Text */}
+            {/* Name Input Field */}
             <ClientNameInput
                 inputValue={inputValue}
                 setInputValue={setInputValue}
@@ -130,15 +131,15 @@ export default function ClientNameScreen() {
             />
 
             {/* Keyboard Layout */}
-            <View className="w-full h-[60%] flex items-center justify-start pt-12 ">
+            <View className="w-full h-[60%] flex items-center justify-start pt-12">
                 {qwertyRows.map((row, rowIndex) => (
                     <View
                         key={rowIndex}
                         className="flex-row mb-1.5"
                         style={{
                             justifyContent: 'center',
-                            gap: 8, // Space between keys
-                            marginLeft: rowIndex === 10 ? 30 : rowIndex === 2 ? -65 : 0, // Shift rows for correct alignment
+                            gap: 8,
+                            marginLeft: rowIndex === 10 ? 30 : rowIndex === 2 ? -65 : 0,
                         }}
                     >
                         {row.map((char) => (
@@ -153,8 +154,7 @@ export default function ClientNameScreen() {
                     </View>
                 ))}
 
-                {/* Bottom Row: Delete | Space | Enter */}
-                {/* Spacebar - Full Row */}
+                {/* Bottom Row: Delete, Space, Submit */}
                 <View className="w-full items-center justify-center">
                     <View className="w-60 flex-row justify-center">
                         <TouchableOpacity
@@ -167,7 +167,6 @@ export default function ClientNameScreen() {
                         </TouchableOpacity>
                     </View>
 
-                    {/* Delete & Submit - Equal Width */}
                     <View className="flex-row gap-x-6 mt-6 w-full max-w-xl">
                         {/* Delete Button */}
                         <TouchableOpacity
@@ -177,7 +176,9 @@ export default function ClientNameScreen() {
                             className="flex-1 h-20 bg-red-600 rounded-lg flex-row items-center justify-center"
                         >
                             <Eraser size={30} color="white" />
-                            <Text className="text-white font-bold text-3xl uppercase text-center ml-2">Delete</Text>
+                            <Text className="text-white font-bold text-3xl uppercase text-center ml-2">
+                                Delete
+                            </Text>
                         </TouchableOpacity>
 
                         {/* Submit Button */}
@@ -185,8 +186,12 @@ export default function ClientNameScreen() {
                             onPress={handleEnter}
                             className="flex-1 h-20 bg-green-600 rounded-lg flex-row items-center justify-center gap-x-3"
                         >
-                            <Text className="text-white font-bold text-3xl uppercase text-center">Submit</Text>
-                            <Text className="text-white text-2xl font-bold opacity-70">({timer}s)</Text>
+                            <Text className="text-white font-bold text-3xl uppercase text-center">
+                                Submit
+                            </Text>
+                            <Text className="text-white text-2xl font-bold opacity-70">
+                                ({timer}s)
+                            </Text>
                         </TouchableOpacity>
                     </View>
                 </View>
