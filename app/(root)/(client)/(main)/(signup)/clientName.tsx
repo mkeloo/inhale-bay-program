@@ -1,4 +1,4 @@
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { Eraser, Space } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
@@ -145,7 +145,7 @@ export default function ClientNameScreen() {
                             <TouchableOpacity
                                 key={char}
                                 onPress={() => handlePress(char)}
-                                className="w-[70px] h-[70px] bg-blue-600 rounded-lg flex items-center justify-center active:scale-95 transition-transform"
+                                className="w-[70px] h-[70px] bg-blue-600 rounded-lg flex items-center justify-center"
                             >
                                 <Text className="text-[40px] font-bold text-white">{char}</Text>
                             </TouchableOpacity>
@@ -159,7 +159,7 @@ export default function ClientNameScreen() {
                     <View className="w-60 flex-row justify-center">
                         <TouchableOpacity
                             onPress={() => handlePress(' ')}
-                            className="w-full h-[60px] bg-blue-600 rounded-lg flex items-center justify-center active:scale-95 transition-transform"
+                            className="w-full h-[60px] bg-blue-600 rounded-lg flex items-center justify-center"
                         >
                             <View className="flex items-center justify-center pb-6">
                                 <Space size={55} color="white" />
@@ -174,7 +174,7 @@ export default function ClientNameScreen() {
                             onPress={handleSingleDelete}
                             onPressIn={startDeleting}
                             onPressOut={stopDeleting}
-                            className="flex-1 h-20 bg-red-600 rounded-lg flex-row items-center justify-center active:scale-95 transition-transform"
+                            className="flex-1 h-20 bg-red-600 rounded-lg flex-row items-center justify-center"
                         >
                             <Eraser size={30} color="white" />
                             <Text className="text-white font-bold text-3xl uppercase text-center ml-2">Delete</Text>

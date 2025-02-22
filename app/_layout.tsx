@@ -5,27 +5,19 @@ import { BackHandler, ToastAndroid, AppState, AppStateStatus, View, Platform } f
 import * as NavigationBar from "expo-navigation-bar";
 import { useKeepAwake } from "expo-keep-awake"; // Prevent screen sleep
 import * as ScreenOrientation from "expo-screen-orientation"; // Import Screen Orientation API
-import { initStorage } from '@/lib/asyncStorage';
 import "../global.css";
-// import { resetStorage } from '@/lib/asyncStorage';
 
 
 export default function RootLayout() {
   const pathname = usePathname(); // Get current route path
   useKeepAwake(); // Prevent screen sleep
 
-  // resetStorage(); // Uncomment to reset AsyncStorage on app startup
 
   // 🔹 Lock screen orientation to LANDSCAPE RIGHT
   const lockScreenOrientation = async () => {
     await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT);
   };
   lockScreenOrientation();
-
-  // 🔹 Initialize AsyncStorage on app startup
-  useEffect(() => {
-    initStorage();
-  }, []);
 
 
   useEffect(() => {
@@ -41,7 +33,7 @@ export default function RootLayout() {
 
       // Function to re-hide the navigation bar after a short delay
       const rehideNavBar = async () => {
-        const delay = pathname === "/admin" ? 2000 : 10; // 2s in /admin, 10ms elsewhere
+        const delay = pathname === "/admin" ? 2 : 2; // 2s in /admin, 10ms elsewhere
 
         setTimeout(async () => {
           await NavigationBar.setVisibilityAsync("hidden");
@@ -85,7 +77,7 @@ export default function RootLayout() {
       <Stack
         screenOptions={{
           headerShown: false,
-          animationDuration: 300, // Smooth transition speed
+          animationDuration: 100, // Smooth transition speed
         }}
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
