@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity, Animated, TextInput } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import PredictiveNameStrip from '@/components/shared/PredictiveNameStrip';
-import { searchNames } from '@/lib/asyncStorage';
+import { searchNames } from '@/lib/namesAPI';
 
 interface ClientNameInputProps {
     inputValue: string;          // controlled by a parent
@@ -18,13 +18,23 @@ export default function ClientNameInput({
 
     useEffect(() => {
         const fetchPredictions = async () => {
-            // search for names matching inputValue
-            await searchNames(inputValue, (results) => {
-                // console.log('searchNames returned:', results); // Debug
-                setPredictions(results);
-            });
+            try {
+                const results = await searchNames(inputValue);
+                // Convert NameEntry objects to an array of names
+                setPredictions(results.map(result => result.name));
+            } catch (error) {
+                console.error('Error fetching predictions:', error);
+                setPredictions([]);
+            }
         };
-        fetchPredictions();
+
+        // Debounce the API call by 300ms
+        const timeoutId = setTimeout(() => {
+            fetchPredictions();
+        }, 100);
+
+        // Clean up the timeout if inputValue changes before the delay
+        return () => clearTimeout(timeoutId);
     }, [inputValue]);
 
     return (
@@ -44,7 +54,6 @@ export default function ClientNameInput({
             <PredictiveNameStrip
                 predictions={predictions}
                 onSelect={(name: string) => {
-                    // console.log('User tapped:', name); // Debug
                     setInputValue(name); // updates inputValue in the parent
                 }}
             />
