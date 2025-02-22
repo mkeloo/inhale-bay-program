@@ -4,7 +4,6 @@ import NetInfo from '@react-native-community/netinfo';
 
 export default function WifiStrengthChecker() {
     const [wifiDetails, setWifiDetails] = useState({
-        ssid: 'N/A',
         strength: 'N/A',
         ipAddress: 'N/A',
         connectionType: 'unknown',
@@ -28,7 +27,6 @@ export default function WifiStrengthChecker() {
                 setWifiDetails({
                     connectionType: state.type,
                     isConnected: state.isConnected,
-                    ssid: state.type === 'wifi' ? state.details?.ssid || "Unknown" : "N/A",
                     strength: state.type === 'wifi'
                         ? `${strengthValue ?? "N/A"} dBm (${strengthText})`
                         : "N/A",
@@ -43,7 +41,6 @@ export default function WifiStrengthChecker() {
                 });
             } else {
                 setWifiDetails({
-                    ssid: "No Connection",
                     strength: "N/A",
                     ipAddress: "N/A",
                     connectionType: "none",
@@ -74,7 +71,6 @@ export default function WifiStrengthChecker() {
             <Text>✅ Connected: {wifiDetails.isConnected ? "Yes" : "No"}</Text>
             {wifiDetails.connectionType === 'wifi' && (
                 <>
-                    <Text>📶 SSID: {wifiDetails.ssid}</Text>
                     <Text>📡 Signal Strength: {wifiDetails.strength}</Text>
                     <Text>🌍 IP Address: {wifiDetails.ipAddress}</Text>
                 </>
