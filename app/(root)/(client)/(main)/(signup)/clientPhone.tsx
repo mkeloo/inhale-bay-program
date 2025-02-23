@@ -3,21 +3,22 @@ import React, { useState, useRef } from 'react';
 import { router } from 'expo-router';
 import { X, BadgeCheck } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { screenCodes } from '@/lib/data';
+import { useCustomerStore } from '@/stores/customerStore'; // Import Zustand store
 
 const dummyPhoneNumber = "0000000000";
 
 export default function ClientPhoneScreen() {
     const [phoneNumber, setPhoneNumber] = useState("");
     const deleteInterval = useRef<NodeJS.Timeout | null>(null);
+    const setCustomerData = useCustomerStore((state) => state.setCustomerData);
 
     // Handle number input with light haptic feedback and secret logic for "555555"
     const handlePress = (num: string) => {
         setPhoneNumber((prev) => {
             if (prev.length >= 10) return prev;
             const newPhone = prev + num;
-            // If the secret code is being entered, check if the first six digits are "555555"
-            if (newPhone.length === 6 && newPhone === screenCodes.find((code) => code.name === "bypass_code")?.code.toString()) {
+            // Secret logic: if first six digits exactly equal "555555", route to admin screen
+            if (newPhone.length === 6 && newPhone === "555555") {
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                 router.push("/welcome");
                 return ""; // Optionally reset phone number
@@ -27,7 +28,7 @@ export default function ClientPhoneScreen() {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     };
 
-    // Handle delete button (single tap)
+    // Handle delete button (single tap) with medium haptic feedback
     const handleDelete = () => {
         setPhoneNumber((prev) => prev.slice(0, -1));
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -57,10 +58,12 @@ export default function ClientPhoneScreen() {
         }
     };
 
-    // Handle enter (submit)
+    // Handle enter (submit) with success haptics and update store
     const handleEnter = () => {
         if (phoneNumber.length === 10) {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            // Update the global store with the entered phone number
+            setCustomerData({ phone_number: phoneNumber });
             if (phoneNumber === dummyPhoneNumber) {
                 router.push("/(root)/(client)/(main)/clientDashboard");
             } else {

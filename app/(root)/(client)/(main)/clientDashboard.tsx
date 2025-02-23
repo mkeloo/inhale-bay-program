@@ -5,6 +5,8 @@ import BackButton from '@/components/shared/BackButton';
 import RewardCard from '@/components/shared/RewardCard';
 import { rewards } from '@/lib/data';
 import TimerButton from '@/components/client/TimerButton';
+import { useCustomerStore } from '@/stores/customerStore'; // Import Zustand store
+
 
 const currentUser = {
     id: 1,
@@ -14,10 +16,21 @@ const currentUser = {
 };
 
 export default function ClientDashboardScreen() {
+    // Get customer data from Zustand store
+    const { phone_number, name, avatar_name } = useCustomerStore();
+
     return (
         <View className="flex-1 py-20 bg-blue-100">
             {/* Back Button */}
             <BackButton />
+
+            {/* User Information Display */}
+            <View className="absolute top-4 left-4 p-4 bg-white rounded-lg shadow-md">
+                <Text className="text-lg font-bold text-gray-900">User Info:</Text>
+                <Text className="text-gray-700">📞 {phone_number || "N/A"}</Text>
+                <Text className="text-gray-700">👤 {name || "N/A"}</Text>
+                <Text className="text-gray-700">🖼️ Avatar: {avatar_name || "N/A"}</Text>
+            </View>
 
             {/* Current Points Display */}
             <View className="absolute top-0 right-0 my-8 mx-8">

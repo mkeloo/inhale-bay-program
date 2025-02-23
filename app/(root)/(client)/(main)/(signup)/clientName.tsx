@@ -7,12 +7,17 @@ import { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reani
 import BackButton from '@/components/shared/BackButton';
 import Stepper from '@/components/client/Stepper';
 import ClientNameInput from '@/components/client/ClientNameInput';
+import { useCustomerStore } from '@/stores/customerStore'; // Import Zustand store
+
 
 export default function ClientNameScreen() {
     const [inputValue, setInputValue] = useState('');
     const deleteInterval = useRef<NodeJS.Timeout | null>(null); // For deletion loop
     const [timer, setTimer] = useState(35);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Zustand store function
+    const setCustomerData = useCustomerStore((state) => state.setCustomerData);
 
     // Start countdown timer and store in intervalRef
     useEffect(() => {
@@ -101,15 +106,34 @@ export default function ClientNameScreen() {
     };
 
     // Handle Enter (Submit)
+    // const handleEnter = () => {
+    //     if (intervalRef.current) {
+    //         clearInterval(intervalRef.current);
+    //         intervalRef.current = null;
+    //     }
+    //     setTimeout(() => {
+    //         router.push('/(root)/(client)/(main)/(signup)/clientAvatar');
+    //     }, 0);
+    //     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    // };
+
+    // Handle Enter (Submit)
     const handleEnter = () => {
         if (intervalRef.current) {
             clearInterval(intervalRef.current);
             intervalRef.current = null;
         }
-        setTimeout(() => {
+
+        if (inputValue.trim().length > 0) {
+            // Save name in Zustand store
+            setCustomerData({ name: inputValue });
+
+            // Navigate to next screen
             router.push('/(root)/(client)/(main)/(signup)/clientAvatar');
-        }, 0);
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+            // Success Haptic Feedback
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        }
     };
 
     return (

@@ -11,6 +11,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import BackButton from '@/components/shared/BackButton';
 import Stepper from '@/components/client/Stepper';
+import { useCustomerStore } from '@/stores/customerStore'; // Import Zustand store
+
 
 export default function ClientAvatarScreen() {
     const [selectedAvatar, setSelectedAvatar] = useState<number | null>(null);
@@ -21,6 +23,9 @@ export default function ClientAvatarScreen() {
     const router = useRouter();
     const scale = useSharedValue(1);
     const checkScale = useSharedValue(0);
+
+    // Zustand store function
+    const setCustomerData = useCustomerStore((state) => state.setCustomerData);
 
     const handleAvatarSelect = (id: number) => {
         setSelectedAvatar(id);
@@ -74,6 +79,13 @@ export default function ClientAvatarScreen() {
         setSelectedAvatar(finalAvatar);
         setShowCheck(true);
         checkScale.value = withSpring(1, { damping: 6, stiffness: 120 });
+
+        // Get avatar name from the selected avatar
+        const avatarName = avatarsImages.find((avatar) => avatar.id === finalAvatar)?.name || '';
+
+        // Save avatar name in Zustand store
+        setCustomerData({ avatar_name: avatarName });
+
 
         setTimeout(() => {
             router.push('/(root)/(client)/(main)/clientDashboard');
