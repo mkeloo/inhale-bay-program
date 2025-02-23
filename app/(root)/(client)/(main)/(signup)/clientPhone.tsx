@@ -1,16 +1,30 @@
 import { View, Text, TouchableOpacity, TextInput, Image } from 'react-native';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { router } from 'expo-router';
 import { X, BadgeCheck } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { useCustomerStore } from '@/stores/customerStore'; // Import Zustand store
+import { fetchCustomerByPhone, fetchStoreIdByCode } from '@/utils/actions'; // Import fetch functions
 
 const dummyPhoneNumber = "0000000000";
+const STORE_CODE = "5751"; // Store code to track customers
+
 
 export default function ClientPhoneScreen() {
     const [phoneNumber, setPhoneNumber] = useState("");
+    const [storeId, setStoreId] = useState<string | null>(null);
     const deleteInterval = useRef<NodeJS.Timeout | null>(null);
     const setCustomerData = useCustomerStore((state) => state.setCustomerData);
+
+    // 🔍 Fetch store ID on mount
+    useEffect(() => {
+        const getStoreId = async () => {
+            const id = await fetchStoreIdByCode(STORE_CODE);
+            setStoreId(id);
+        };
+        getStoreId();
+    }, []);
+
 
     // Handle number input with light haptic feedback and secret logic for "555555"
     const handlePress = (num: string) => {
@@ -58,15 +72,29 @@ export default function ClientPhoneScreen() {
         }
     };
 
-    // Handle enter (submit) with success haptics and update store
-    const handleEnter = () => {
+    // Handle enter (submit)
+    const handleEnter = async () => {
         if (phoneNumber.length === 10) {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            // Update the global store with the entered phone number
-            setCustomerData({ phone_number: phoneNumber });
-            if (phoneNumber === dummyPhoneNumber) {
+
+            // 🔍 Check if customer exists
+            const existingCustomer = await fetchCustomerByPhone(phoneNumber);
+
+            if (existingCustomer) {
+                // Existing customer → Set store data & redirect
+                setCustomerData({
+                    store_id: existingCustomer.store_id,
+                    phone_number: existingCustomer.phone_number,
+                    name: existingCustomer.name,
+                    avatar_name: existingCustomer.avatar_name,
+                });
                 router.push("/(root)/(client)/(main)/clientDashboard");
             } else {
+                // New customer → Assign store_id and continue registration
+                setCustomerData({
+                    store_id: storeId || "",
+                    phone_number: phoneNumber,
+                });
                 router.push("/(root)/(client)/(main)/(signup)/clientName");
             }
         }

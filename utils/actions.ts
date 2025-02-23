@@ -33,6 +33,24 @@ export const fetchStores = async (): Promise<Store[]> => {
     return data || [];
 };
 
+// ───────────────────────────────────────────────────────────
+// Fetch Store ID by Store Code
+// ───────────────────────────────────────────────────────────
+
+export const fetchStoreIdByCode = async (storeCode: string): Promise<string | null> => {
+    const { data, error } = await supabase
+        .from('inhale_bay_stores')
+        .select('id')
+        .eq('store_code', storeCode)
+        .single();
+
+    if (error) {
+        console.error(`Error fetching store ID for store_code ${storeCode}:`, error);
+        return null;
+    }
+
+    return data?.id || null;
+};
 
 // ───────────────────────────────────────────────────────────
 // Fetch User Types from Supabase
@@ -73,9 +91,27 @@ export const fetchRewards = async (): Promise<Reward[]> => {
     return data || [];
 };
 
+// ───────────────────────────────────────────────────────────
+// Fetch Customer by Phone Number from Supabase
+// ───────────────────────────────────────────────────────────
+
+export const fetchCustomerByPhone = async (phoneNumber: string) => {
+    const { data, error } = await supabase
+        .from('customers')
+        .select('*')
+        .eq('phone_number', phoneNumber)
+        .maybeSingle(); // ✅ Prevents errors when no rows are found
+
+    if (error) {
+        console.error('Error fetching customer:', error);
+        return null; // 🚀 Ensure function doesn't crash
+    }
+
+    return data; // ✅ Returns null if no customer is found, avoiding an error
+};
 
 // ───────────────────────────────────────────────────────────
-// Insert Customers into Supabase customers table
+// Insert New Customer into Supabase Customers Table
 // ───────────────────────────────────────────────────────────
 
 export interface Customer {
@@ -93,10 +129,26 @@ export interface Customer {
 }
 
 
-export const insertCustomer = async (customer: Customer): Promise<{ data: any; error: any }> => {
-    const { data, error } = await supabase.from('customers').insert([customer]);
+export const insertCustomer = async (customer: Pick<Customer, 'store_id' | 'phone_number' | 'name' | 'avatar_name'>): Promise<{ data: any; error: any }> => {
+    const { data, error } = await supabase.from('customers').insert([
+        {
+            store_id: customer.store_id,
+            phone_number: customer.phone_number,
+            name: customer.name,
+            avatar_name: customer.avatar_name,
+            current_points: 0, // New customers start with 0 points
+            lifetime_points: 0, // No accumulated points yet
+            total_visits: 1, // First visit
+            last_visit: new Date().toISOString(), // Current timestamp
+            joined_date: new Date().toISOString().split('T')[0], // Store only the date
+            membership_level: 'new', // Default membership level
+            is_active: true, // All new customers are active by default
+        },
+    ]);
+
     if (error) {
         console.error('Error inserting customer:', error);
     }
+
     return { data, error };
 };

@@ -1,11 +1,13 @@
 import { View, Text, Image, FlatList } from 'react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { router } from 'expo-router';
 import BackButton from '@/components/shared/BackButton';
 import RewardCard from '@/components/shared/RewardCard';
 import { rewards } from '@/lib/data';
 import TimerButton from '@/components/client/TimerButton';
 import { useCustomerStore } from '@/stores/customerStore'; // Import Zustand store
+import { insertCustomer, fetchCustomerByPhone } from '@/utils/actions'; // Import insert function
+
 
 
 const currentUser = {
@@ -17,7 +19,31 @@ const currentUser = {
 
 export default function ClientDashboardScreen() {
     // Get customer data from Zustand store
-    const { phone_number, name, avatar_name } = useCustomerStore();
+    const { phone_number, name, avatar_name, store_id } = useCustomerStore();
+    const [customerExists, setCustomerExists] = useState(false);
+
+    useEffect(() => {
+        const checkAndInsertCustomer = async () => {
+            if (!phone_number || !name || !store_id) return;
+
+            const existingCustomer = await fetchCustomerByPhone(phone_number);
+            if (!existingCustomer) {
+                // Insert new customer into the database
+                await insertCustomer({
+                    store_id,
+                    phone_number,
+                    name,
+                    avatar_name,
+                });
+
+                setCustomerExists(true);
+            } else {
+                setCustomerExists(true); // Mark customer as already existing
+            }
+        };
+
+        checkAndInsertCustomer();
+    }, [phone_number, name, store_id]);
 
     return (
         <View className="flex-1 py-20 bg-blue-100">
