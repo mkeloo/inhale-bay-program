@@ -11,7 +11,7 @@ import ClientNameInput from '@/components/client/ClientNameInput';
 export default function ClientNameScreen() {
     const [inputValue, setInputValue] = useState('');
     const deleteInterval = useRef<NodeJS.Timeout | null>(null); // For deletion loop
-    const [timer, setTimer] = useState(15);
+    const [timer, setTimer] = useState(35);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
     // Start countdown timer and store in intervalRef

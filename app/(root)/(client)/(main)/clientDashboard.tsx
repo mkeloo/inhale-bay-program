@@ -94,7 +94,7 @@ export default function ClientDashboardScreen() {
                 <TimerButton
                     title="Done"
                     route="/(root)/(client)/(main)/(signup)/clientPhone"
-                    duration={10}
+                    duration={50}
                 />
             </View>
         </View>

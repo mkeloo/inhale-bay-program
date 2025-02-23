@@ -15,7 +15,7 @@ import Stepper from '@/components/client/Stepper';
 export default function ClientAvatarScreen() {
     const [selectedAvatar, setSelectedAvatar] = useState<number | null>(null);
     const [showCheck, setShowCheck] = useState(false);
-    const [timer, setTimer] = useState(10);
+    const [timer, setTimer] = useState(15);
     const [submitted, setSubmitted] = useState(false);
 
     const router = useRouter();
