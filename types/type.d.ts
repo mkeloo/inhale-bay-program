@@ -15,12 +15,11 @@ export interface ModalProps {
 export interface RewardCardProps {
     title: string;
     rewardName: string;
-    reward_type?: 'reward' | 'promo';
-    unlock_points?: number;
-    days_left?: number;
-    isLocked?: boolean;
+    reward_type: 'promo' | 'reward';
+    unlock_points?: number | null; // Now allows null
+    days_left?: number | null;     // Now allows null
+    isLocked: boolean;
 }
-
 
 export interface UserProfileProps {
     id: number;
