@@ -81,7 +81,10 @@ export interface Reward {
 
 // Fetch rewards from Supabase
 export const fetchRewards = async (): Promise<Reward[]> => {
-    const { data, error } = await supabase.from('rewards').select('*');
+    const { data, error } = await supabase
+        .from('rewards')
+        .select('*')
+        .or('reward_type.eq.reward,reward_type.eq.promo.and(active.eq.true)');
 
     if (error) {
         console.error('Error fetching rewards:', error);
@@ -151,4 +154,116 @@ export const insertCustomer = async (customer: Pick<Customer, 'store_id' | 'phon
     }
 
     return { data, error };
+};
+
+
+
+// ───────────────────────────────────────────────────────────
+// Update Customer Information into Supabase Customers Table
+// ───────────────────────────────────────────────────────────
+
+
+// ───────────────────────────────────────────────────────────
+// Handle Customer Login or Return Visit
+// ───────────────────────────────────────────────────────────
+export const handleCustomerLogin = async (
+    store_id: string,
+    phone_number: string,
+    name: string,
+    avatar_name?: string
+) => {
+    // 1. Check if customer exists
+    const { data: existingCustomer, error: fetchError } = await supabase
+        .from('customers')
+        .select('*')
+        .eq('phone_number', phone_number)
+        .maybeSingle();
+
+    if (fetchError) {
+        console.error('Error fetching customer:', fetchError);
+        return null;
+    }
+
+    // 2. If not found, insert a new record
+    if (!existingCustomer) {
+        const { data: inserted, error: insertError } = await supabase
+            .from('customers')
+            .insert({
+                store_id,
+                phone_number,
+                name,
+                avatar_name,
+                current_points: 0,
+                lifetime_points: 0,
+                total_visits: 1,
+                last_visit: new Date().toISOString(),
+                joined_date: new Date().toISOString().split('T')[0],
+                membership_level: 'new',
+                is_active: true,
+            })
+            .single();
+
+        if (insertError) {
+            console.error('Insert error:', insertError);
+            return null;
+        }
+
+        return inserted;
+    }
+    // 3. If found, update the existing record
+    else {
+        const { data: updated, error: updateError } = await supabase
+            .from('customers')
+            .update({
+                last_visit: new Date().toISOString(),
+                is_active: true,
+                total_visits: (existingCustomer.total_visits ?? 0) + 1,
+            })
+            .eq('id', existingCustomer.id)
+            .single();
+
+        if (updateError) {
+            console.error('Update error:', updateError);
+            return null;
+        }
+
+        return updated;
+    }
+};
+
+
+// ───────────────────────────────────────────────────────────
+// Update Customer Points to show customer's current points
+// ───────────────────────────────────────────────────────────
+export const updateCustomerPoints = async (
+    phone_number: string,
+    totalPoints: number,
+    earnedPoints: number
+) => {
+    // Fetch the current customer record
+    const customer = await fetchCustomerByPhone(phone_number);
+    if (!customer) {
+        console.error("Customer not found for phone number:", phone_number);
+        return null;
+    }
+
+    // Calculate new lifetime points (only add earned points)
+    const newLifetimePoints = (customer.lifetime_points || 0) + earnedPoints;
+
+    // Update the customer's record with new current_points and lifetime_points
+    const { data, error } = await supabase
+        .from("customers")
+        .update({
+            current_points: totalPoints,
+            lifetime_points: newLifetimePoints,
+        })
+        .eq("phone_number", phone_number)
+        .single();
+
+    if (error) {
+        console.error("Error updating customer points:", error);
+        return null;
+    }
+
+    return data;
 };

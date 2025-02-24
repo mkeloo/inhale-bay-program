@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { Delete } from "lucide-react-native"; // Delete (X) and Submit Icons
+import { Delete } from "lucide-react-native"; // Delete (X) icon
+import { useRewardStore } from "@/stores/rewardStore";
 
-// Define RootStackParamList if not defined elsewhere
 type RootStackParamList = {
     UserRewardSummary: undefined;
 };
@@ -13,20 +13,23 @@ export default function UserAddReward() {
     const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
     const [points, setPoints] = useState(""); // Store the numeric input
 
-    // Handle number input
+    // Get the setter from the reward store to store earned points
+    const setEarnedPoints = useRewardStore((state) => state.setEarnedPoints);
+
+    // Handle number input: append the pressed digit
     const handlePress = (num: string) => {
         setPoints((prev) => prev + num);
     };
 
-    // Handle delete button
+    // Handle delete button: remove the last digit
     const handleDelete = () => {
-        setPoints((prev) => prev.slice(0, -1)); // Remove last digit
+        setPoints((prev) => prev.slice(0, -1));
     };
 
-    // Handle submit
+    // Handle submit: store the earned points and navigate
     const handleSubmit = () => {
         if (points) {
-            // Proceed to the next screen with points value
+            setEarnedPoints(Number(points));
             navigation.navigate("UserRewardSummary");
         }
     };
@@ -44,7 +47,7 @@ export default function UserAddReward() {
                 </TouchableOpacity>
             </View>
 
-            {/* Right Side: Keypad */}
+            {/* Keypad */}
             <View className="flex-1 justify-center items-center mt-6">
                 <View className="flex flex-row flex-wrap justify-center w-[240px] gap-4">
                     {/* First Row */}
@@ -58,7 +61,7 @@ export default function UserAddReward() {
                                 shadowOffset: { width: 0, height: 5 },
                                 shadowOpacity: 0.3,
                                 shadowRadius: 5,
-                                elevation: 5, // Android elevation
+                                elevation: 5,
                             }}
                         >
                             <Text className="text-3xl font-bold text-black">{num}</Text>
@@ -101,7 +104,7 @@ export default function UserAddReward() {
                         </TouchableOpacity>
                     ))}
 
-                    {/* Fourth Row: Zero & Submit (Same Row) */}
+                    {/* Fourth Row: Zero & Submit */}
                     <TouchableOpacity
                         onPress={() => handlePress("0")}
                         className="w-20 h-20 bg-white border border-gray-400 rounded-lg flex items-center justify-center shadow-lg"
@@ -118,14 +121,15 @@ export default function UserAddReward() {
 
                     <TouchableOpacity
                         onPress={handleSubmit}
-                        disabled={!points} // Disable if no input
-                        className={`flex-1 h-20 px-4 rounded-lg flex items-center justify-center shadow-lg ${points ? "bg-green-600" : "bg-gray-400 opacity-50"}`}
+                        disabled={!points}
+                        className={`flex-1 h-20 px-4 rounded-lg flex items-center justify-center shadow-lg ${points ? "bg-green-600" : "bg-gray-400 opacity-50"
+                            }`}
                         style={{
                             shadowColor: "#000",
                             shadowOffset: { width: 0, height: 5 },
                             shadowOpacity: 0.4,
                             shadowRadius: 5,
-                            elevation: 6, // Stronger elevation for submit button
+                            elevation: 6,
                         }}
                     >
                         <Text className="text-white font-bold text-2xl uppercase">Submit</Text>

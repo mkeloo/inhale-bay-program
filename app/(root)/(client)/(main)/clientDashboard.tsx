@@ -5,7 +5,7 @@ import BackButton from '@/components/shared/BackButton';
 import RewardCard from '@/components/shared/RewardCard';
 import TimerButton from '@/components/client/TimerButton';
 import { useCustomerStore } from '@/stores/customerStore';
-import { insertCustomer, fetchCustomerByPhone, fetchRewards, Reward } from '@/utils/actions';
+import { handleCustomerLogin, insertCustomer, fetchCustomerByPhone, fetchRewards, Reward } from '@/utils/actions';
 
 // Example User Points (This will be fetched from state or backend in real use)
 const currentUser = {
@@ -19,6 +19,8 @@ export default function ClientDashboardScreen() {
     const { phone_number, name, avatar_name, store_id } = useCustomerStore();
     const [customerExists, setCustomerExists] = useState(false);
     const [rewards, setRewards] = useState<Reward[]>([]); // Specify the type for rewards
+    const [customerData, setCustomerData] = useState<{ current_points: number } | null>(null);
+
 
     // Fetch rewards from the server using fetchRewards
     useEffect(() => {
@@ -29,22 +31,30 @@ export default function ClientDashboardScreen() {
         loadRewards();
     }, []);
 
-    // Check and insert customer if necessary
+    // Fetch customer data when phone number is available
     useEffect(() => {
-        const checkAndInsertCustomer = async () => {
-            if (!phone_number || !name || !store_id) return;
+        const loadCustomerData = async () => {
+            if (!phone_number) return;
+            const fetchedCustomer = await fetchCustomerByPhone(phone_number);
+            if (fetchedCustomer) {
+                setCustomerData(fetchedCustomer);
+            }
+        };
+        loadCustomerData();
+    }, [phone_number]);
 
-            const existingCustomer = await fetchCustomerByPhone(phone_number);
-            if (!existingCustomer) {
-                await insertCustomer({ store_id, phone_number, name, avatar_name });
-                setCustomerExists(true);
-            } else {
+    // Check and log in customer (insert new or update existing)
+    useEffect(() => {
+        const loginCustomer = async () => {
+            if (!phone_number || !name || !store_id) return;
+            const result = await handleCustomerLogin(store_id, phone_number, name, avatar_name);
+            if (result) {
                 setCustomerExists(true);
             }
         };
 
-        checkAndInsertCustomer();
-    }, [phone_number, name, store_id]);
+        loginCustomer();
+    }, [phone_number, name, store_id, avatar_name]);
 
     return (
         <View className="flex-1 py-20 bg-blue-100">
@@ -76,7 +86,7 @@ export default function ClientDashboardScreen() {
                         className="w-10 h-10"
                     />
                     <Text className="font-bold text-2xl text-gray-100">
-                        {currentUser.current_points}
+                        {customerData?.current_points ?? 0}
                     </Text>
                 </View>
             </View>
@@ -103,9 +113,25 @@ export default function ClientDashboardScreen() {
 
                 {/* Horizontal Scrollable List */}
                 <FlatList
-                    data={[...rewards].sort((a, b) =>
-                        a.reward_type === 'promo' && b.reward_type !== 'promo' ? -1 : 1
-                    )}
+                    data={[
+                        ...rewards
+                            // 1) Filter out "0 reward" items (unless it's a promo with 0 points)
+                            .filter((item) => {
+                                return !(
+                                    (item.unlock_points ?? 0) === 0 &&
+                                    item.reward_type !== "promo"
+                                );
+                            })
+                            // 2) Sort: promos first, then ascending points
+                            .sort((a, b) => {
+                                // Promo items to the front
+                                if (a.reward_type === "promo" && b.reward_type !== "promo") return -1;
+                                if (b.reward_type === "promo" && a.reward_type !== "promo") return 1;
+
+                                // Among the same type, sort by unlock_points ascending
+                                return (a.unlock_points ?? 0) - (b.unlock_points ?? 0);
+                            })
+                    ]}
                     keyExtractor={(item) => item.id.toString()}
                     horizontal
                     showsHorizontalScrollIndicator={false}
@@ -114,7 +140,8 @@ export default function ClientDashboardScreen() {
                         const isLocked =
                             item.reward_type !== 'promo' &&
                             item.unlock_points !== undefined &&
-                            item.unlock_points !== null && currentUser.current_points < item.unlock_points;
+                            item.unlock_points !== null &&
+                            (customerData?.current_points ?? 0) < item.unlock_points;
 
                         return (
                             <View className="px-2">
@@ -137,7 +164,7 @@ export default function ClientDashboardScreen() {
                 <TimerButton
                     title="Done"
                     route="/(root)/(client)/(main)/(signup)/clientPhone"
-                    duration={50}
+                    duration={1000}
                 />
             </View>
         </View>
