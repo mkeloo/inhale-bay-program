@@ -6,7 +6,6 @@ import * as Haptics from 'expo-haptics';
 import { useCustomerStore } from '@/stores/customerStore'; // Import Zustand store
 import { fetchCustomerByPhone, fetchStoreIdByCode } from '@/utils/actions'; // Import fetch functions
 
-const dummyPhoneNumber = "0000000000";
 const STORE_CODE = "5751"; // Store code to track customers
 
 

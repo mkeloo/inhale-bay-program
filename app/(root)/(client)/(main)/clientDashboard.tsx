@@ -5,15 +5,7 @@ import BackButton from '@/components/shared/BackButton';
 import RewardCard from '@/components/shared/RewardCard';
 import TimerButton from '@/components/client/TimerButton';
 import { useCustomerStore } from '@/stores/customerStore';
-import { handleCustomerLogin, insertCustomer, fetchCustomerByPhone, fetchRewards, Reward } from '@/utils/actions';
-
-// Example User Points (This will be fetched from state or backend in real use)
-const currentUser = {
-    id: 1,
-    name: 'John Doe',
-    phone_number: '1234567890',
-    current_points: 100,
-};
+import { handleCustomerLogin, fetchCustomerByPhone, fetchRewards, Reward, } from '@/utils/actions';
 
 export default function ClientDashboardScreen() {
     const { phone_number, name, avatar_name, store_id } = useCustomerStore();
@@ -104,7 +96,7 @@ export default function ClientDashboardScreen() {
                                     ? Math.min(...unlockableRewards.map((r) => r.unlock_points!))
                                     : Infinity;
 
-                            return currentUser.current_points < minUnlockPoints
+                            return (customerData?.current_points ?? 0) < minUnlockPoints
                                 ? "Unlock these great rewards!"
                                 : "Tell us what you'd like!";
                         })()}
