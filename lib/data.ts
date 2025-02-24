@@ -165,8 +165,8 @@ export const rewards = [
 ]
 
 export const membershipColors = {
-    New: "#22C55E", // Green
-    Regular: "#FACC15", // Yellow
-    VIP: "#3B82F6", // Blue
-    VVIP: "#9333EA", // Purple
+    new: "#22C55E", // Green
+    regular: "#FACC15", // Yellow
+    vip: "#3B82F6", // Blue
+    vvip: "#9333EA", // Purple
 };
