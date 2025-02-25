@@ -8,6 +8,7 @@ import BackButton from '@/components/shared/BackButton';
 import Stepper from '@/components/client/Stepper';
 import ClientNameInput from '@/components/client/ClientNameInput';
 import { useCustomerStore } from '@/stores/customerStore'; // Import Zustand store
+import { avatarsImages } from '@/lib/data';
 
 
 export default function ClientNameScreen() {
@@ -125,11 +126,19 @@ export default function ClientNameScreen() {
         }
 
         if (inputValue.trim().length > 0) {
-            // Save name in Zustand store
-            setCustomerData({ name: inputValue });
+            // Randomly assign an avatar
+            const randomIndex = Math.floor(Math.random() * avatarsImages.length);
+            const randomAvatar = avatarsImages[randomIndex];
 
-            // Navigate to next screen
-            router.push('/(root)/(client)/(main)/(signup)/clientAvatar');
+            // Save name and randomly assigned avatar in Zustand store
+            setCustomerData({
+                name: inputValue,
+                avatar_name: randomAvatar.name,
+            });
+
+
+            // Navigate to dashboard directly (skip avatar selection screen)
+            router.push('/(root)/(client)/(main)/clientDashboard');
 
             // Success Haptic Feedback
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
