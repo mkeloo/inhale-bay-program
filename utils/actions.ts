@@ -166,60 +166,105 @@ export const insertCustomer = async (customer: Pick<Customer, 'store_id' | 'phon
 // ───────────────────────────────────────────────────────────
 // Handle Customer Login or Return Visit
 // ───────────────────────────────────────────────────────────
+// export const handleCustomerLogin = async (
+//     store_id: string,
+//     phone_number: string,
+//     name: string,
+//     avatar_name?: string
+// ) => {
+//     // 1. Check if customer exists
+//     const { data: existingCustomer, error: fetchError } = await supabase
+//         .from('customers')
+//         .select('*')
+//         .eq('phone_number', phone_number)
+//         .maybeSingle();
+
+//     if (fetchError && fetchError.code !== 'PGRST116') {
+//         // PGRST116 = "No rows found" → This is fine for new customers
+//         console.error('Error fetching customer:', fetchError);
+//         return null;
+//     }
+
+//     // 2. If not found, insert a new record
+//     if (!existingCustomer) {
+//         const { data: inserted, error: insertError } = await supabase
+//             .from('customers')
+//             .insert({
+//                 store_id,
+//                 phone_number,
+//                 name,
+//                 avatar_name,
+//                 current_points: 0,
+//                 lifetime_points: 0,
+//                 total_visits: 1,
+//                 last_visit: new Date().toISOString(),
+//                 joined_date: new Date().toISOString().split('T')[0],
+//                 membership_level: 'new',
+//                 is_active: true,
+//             })
+//             .single();
+
+//         if (insertError) {
+//             console.error('Insert error:', insertError);
+//             return null;
+//         }
+
+//         return inserted;
+//     }
+//     // 3. If found, update the existing record
+//     else {
+//         const { data: updated, error: updateError } = await supabase
+//             .from('customers')
+//             .update({
+//                 last_visit: new Date().toISOString(),
+//                 is_active: true,
+//                 total_visits: (existingCustomer.total_visits ?? 0) + 1,
+//             })
+//             .eq('id', existingCustomer.id)
+//             .single();
+
+//         if (updateError) {
+//             console.error('Update error:', updateError);
+//             return null;
+//         }
+
+//         return updated;
+//     }
+// };
+
 export const handleCustomerLogin = async (
     store_id: string,
     phone_number: string,
     name: string,
     avatar_name?: string
 ) => {
-    // 1. Check if customer exists
+    // 🔍 Check if customer already exists
     const { data: existingCustomer, error: fetchError } = await supabase
         .from('customers')
         .select('*')
         .eq('phone_number', phone_number)
-        .maybeSingle();
+        .maybeSingle(); // Ensure single record lookup
 
-    if (fetchError) {
+    if (fetchError && fetchError.code !== 'PGRST116') {
+        // PGRST116 = "No rows found" → This is fine for new customers
         console.error('Error fetching customer:', fetchError);
         return null;
     }
 
-    // 2. If not found, insert a new record
-    if (!existingCustomer) {
-        const { data: inserted, error: insertError } = await supabase
-            .from('customers')
-            .insert({
-                store_id,
-                phone_number,
-                name,
-                avatar_name,
-                current_points: 0,
-                lifetime_points: 0,
-                total_visits: 1,
-                last_visit: new Date().toISOString(),
-                joined_date: new Date().toISOString().split('T')[0],
-                membership_level: 'new',
-                is_active: true,
-            })
-            .single();
-
-        if (insertError) {
-            console.error('Insert error:', insertError);
-            return null;
-        }
-
-        return inserted;
-    }
-    // 3. If found, update the existing record
-    else {
+    if (existingCustomer) {
+        // ✅ Customer exists → Update their visit information
         const { data: updated, error: updateError } = await supabase
             .from('customers')
             .update({
                 last_visit: new Date().toISOString(),
-                is_active: true,
-                total_visits: (existingCustomer.total_visits ?? 0) + 1,
+                total_visits: (existingCustomer.total_visits ?? 0) + 1, // Increment visits
+                is_active: true, // Reactivate customer
+                store_id, // Update store_id if needed
+                name, // Ensure name is updated
+                avatar_name, // Ensure avatar is stored
             })
-            .eq('id', existingCustomer.id)
+            .eq('phone_number', phone_number) // Match by phone number
+            .select()
             .single();
 
         if (updateError) {
@@ -228,6 +273,34 @@ export const handleCustomerLogin = async (
         }
 
         return updated;
+    } else {
+        // 🔹 New Customer → Insert into database
+        const { data: inserted, error: insertError } = await supabase
+            .from('customers')
+            .insert([
+                {
+                    store_id,
+                    phone_number,
+                    name,
+                    avatar_name,
+                    current_points: 0,
+                    lifetime_points: 0,
+                    total_visits: 1,
+                    last_visit: new Date().toISOString(),
+                    joined_date: new Date().toISOString().split('T')[0],
+                    membership_level: 'new',
+                    is_active: true,
+                },
+            ])
+            .select()
+            .maybeSingle();
+
+        if (insertError) {
+            // console.error('Insert error:', insertError);
+            return null;
+        }
+
+        return inserted;
     }
 };
 
@@ -265,5 +338,62 @@ export const updateCustomerPoints = async (
         return null;
     }
 
+    return data;
+};
+
+
+// ───────────────────────────────────────────────────────────
+// Insert or Update Recent Customer Visit (Stack of 8)
+// ───────────────────────────────────────────────────────────
+
+export const logRecentVisit = async (
+    customer_id: string,
+    phone_number: string,
+    store_id: string
+) => {
+    const { data, error } = await supabase
+        .from('recent_visits')
+        .upsert({
+            customer_id,
+            phone_number,
+            store_id,
+            last_visit: new Date().toISOString(),
+        }, { onConflict: 'customer_id' })
+        .select();
+    if (error) {
+        console.error('Error logging recent visit:', error);
+    }
+    return data;
+};
+
+// ───────────────────────────────────────────────────────────
+// Fetch Customer information using customer.id
+// ───────────────────────────────────────────────────────────
+
+export const fetchCustomerById = async (
+    customerId: string
+): Promise<Customer | null> => {
+    const { data, error } = await supabase
+        .from('customers')
+        .select(`
+            id,
+            store_id,
+            phone_number,
+            name,
+            avatar_name,
+            current_points,
+            lifetime_points,
+            total_visits,
+            last_visit,
+            membership_level,
+            is_active,
+            joined_date
+        `)
+        .eq('id', customerId)
+        .maybeSingle();
+    if (error) {
+        console.error("Error fetching customer by ID:", error);
+        return null;
+    }
     return data;
 };
