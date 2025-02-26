@@ -1,17 +1,21 @@
 import { View, Text, Image, FlatList } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { router } from 'expo-router';
 import BackButton from '@/components/shared/BackButton';
 import RewardCard from '@/components/shared/RewardCard';
 import TimerButton from '@/components/client/TimerButton';
 import { useCustomerStore } from '@/stores/customerStore';
-import { handleCustomerLogin, fetchCustomerByPhone, fetchRewards, Reward, } from '@/utils/actions';
+import { handleCustomerLogin, fetchCustomerByPhone, fetchRewards, Reward, logCustomerTransaction, } from '@/utils/actions';
 
 export default function ClientDashboardScreen() {
     const { phone_number, name, avatar_name, store_id } = useCustomerStore();
     const [customerExists, setCustomerExists] = useState(false);
     const [rewards, setRewards] = useState<Reward[]>([]); // Specify the type for rewards
     const [customerData, setCustomerData] = useState<{ current_points: number } | null>(null);
+
+    // Ref to track if customer has been logged in
+    // This prevents multiple logins on re-renders
+    const hasLoggedRef = useRef(false);
 
 
     // Fetch rewards from the server using fetchRewards
@@ -35,18 +39,37 @@ export default function ClientDashboardScreen() {
         loadCustomerData();
     }, [phone_number]);
 
+
+
     // Check and log in customer (insert new or update existing)
     useEffect(() => {
         const loginCustomer = async () => {
             if (!phone_number || !name || !store_id) return;
+            if (hasLoggedRef.current) return; // Already logged once, skip
+
             const result = await handleCustomerLogin(store_id, phone_number, name, avatar_name);
             if (result) {
+                hasLoggedRef.current = true; // Mark as logged
                 setCustomerExists(true);
+
+                // Determine transaction type: if first visit => 'signup', else => 'visit'
+                const transactionType = result.total_visits === 1 ? 'signup' : 'visit';
+                logCustomerTransaction(
+                    result.store_id,
+                    result.id,
+                    transactionType,
+                    0, // points_changed
+                    result.current_points || 0
+                )
+                    .then(() => console.log("Login transaction logged successfully."))
+                    .catch((err) => console.error("Error logging login transaction:", err));
             }
         };
 
         loginCustomer();
+        // Only re-run if phone_number, name, store_id, or avatar_name become valid
     }, [phone_number, name, store_id, avatar_name]);
+
 
     return (
         <View className="flex-1 py-20 bg-blue-100">

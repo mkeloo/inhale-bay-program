@@ -313,17 +313,17 @@ export const updateCustomerPoints = async (
     totalPoints: number,
     earnedPoints: number
 ) => {
-    // Fetch the current customer record
+    // Fetch current customer
     const customer = await fetchCustomerByPhone(phone_number);
     if (!customer) {
         console.error("Customer not found for phone number:", phone_number);
         return null;
     }
 
-    // Calculate new lifetime points (only add earned points)
+    // Calculate new lifetime points
     const newLifetimePoints = (customer.lifetime_points || 0) + earnedPoints;
 
-    // Update the customer's record with new current_points and lifetime_points
+    // Update record and SELECT the full row
     const { data, error } = await supabase
         .from("customers")
         .update({
@@ -331,14 +331,15 @@ export const updateCustomerPoints = async (
             lifetime_points: newLifetimePoints,
         })
         .eq("phone_number", phone_number)
-        .single();
+        .select("*") // IMPORTANT: ensures store_id, id, etc. come back
+        .single();   // returns an object instead of an array
 
     if (error) {
         console.error("Error updating customer points:", error);
         return null;
     }
 
-    return data;
+    return data; // This will be a single customer object
 };
 
 
@@ -393,6 +394,40 @@ export const fetchCustomerById = async (
         .maybeSingle();
     if (error) {
         console.error("Error fetching customer by ID:", error);
+        return null;
+    }
+    return data;
+};
+
+
+// ───────────────────────────────────────────────────────────
+// Logging Customer Transactions
+// ───────────────────────────────────────────────────────────
+
+export const logCustomerTransaction = async (
+    store_id: string,
+    customer_id: string,
+    transaction_type: 'signup' | 'visit' | 'redeem_reward',
+    points_changed: number,
+    net_points: number,
+    reward_id?: number
+) => {
+    const { data, error } = await supabase
+        .from('customer_transactions')
+        .insert([
+            {
+                store_id,
+                customer_id,
+                transaction_type,
+                points_changed,
+                net_points,
+                reward_id: reward_id || null,
+            },
+        ])
+        .select();
+
+    if (error) {
+        console.error("Error logging customer transaction:", error);
         return null;
     }
     return data;
