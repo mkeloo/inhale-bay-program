@@ -1,8 +1,8 @@
 import { View, Text, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
-import { screenCodes } from '@/lib/data';
-import { BadgeCheck, Delete, MoveLeft } from 'lucide-react-native';
+// import { screenCodes } from '@/lib/data';
+import { BadgeCheck, Delete } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, {
     useSharedValue,
@@ -12,6 +12,7 @@ import Animated, {
     ReanimatedLogLevel,
 } from "react-native-reanimated";
 import BackButton from '../shared/BackButton';
+import { fetchScreenCodeByName } from '@/utils/actions';
 
 // This is the default configuration
 configureReanimatedLogger({
@@ -31,8 +32,6 @@ export default function ConfirmScreenWrapper({ screenType }: ConfirmScreenWrappe
     const [isError, setIsError] = useState<boolean>(false); // Track error state
     const router = useRouter();
 
-    // Get expected passcode based on `screenType`
-    const passcode = screenCodes.find((screen) => screen.name === screenType)?.code.toString();
 
 
     const translateY = useSharedValue(statusMessage ? 50 : 0); // Move up if message exists
@@ -77,35 +76,50 @@ export default function ConfirmScreenWrapper({ screenType }: ConfirmScreenWrappe
     };
 
     // Handle enter button
-    const handleEnter = () => {
-        const adminPasscode = screenCodes.find((screen) => screen.name === "admin")?.code.toString(); // Get admin code dynamically
+    // ───────────────────────────────────────────────────────────
+    // Fetch Screen Code on Enter Button Press
+    // ───────────────────────────────────────────────────────────
+    const handleEnter = async () => {
+        try {
+            // Fetch screen code from Supabase
+            const fetchedCode = await fetchScreenCodeByName(screenType);
 
-        if (inputCode === adminPasscode) {
-            showStatusMessage("Admin Access Granted", false);
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); // Haptic success feedback
+            if (!fetchedCode) {
+                showStatusMessage("Screen code not found", true);
+                return;
+            }
 
-            setTimeout(() => {
-                router.push("/(root)/(admin)/admin"); // Secret bypass to admin
-            }, 2000);
-            return; // Prevent further checks
-        }
+            const adminPasscode = await fetchScreenCodeByName("admin");
 
-        // Check normal screen-based navigation
-        if (inputCode === passcode) {
-            showStatusMessage("Access Granted", false);
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            if (inputCode === adminPasscode?.toString()) {
+                showStatusMessage("Admin Access Granted", false);
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                setTimeout(() => {
+                    router.push("/(root)/(admin)/admin");
+                }, 2000);
+                return;
+            }
 
-            setTimeout(() => {
-                if (screenType === "client") {
-                    router.push("/(root)/(client)/(main)/(signup)/clientPhone"); // Navigate to client home
-                } else if (screenType === "handler") {
-                    router.push("/(root)/(handler)/(main)/handlerHome"); // Navigate to handler dashboard
-                }
-            }, 2000);
-        } else {
-            showStatusMessage("Incorrect Passcode", true);
-            setInputCode(""); // Reset input if incorrect
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+            // Validate against the fetched screen code
+            if (inputCode === fetchedCode.toString()) {
+                showStatusMessage("Access Granted", false);
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+                setTimeout(() => {
+                    if (screenType === "client") {
+                        router.push("/(root)/(client)/(main)/(signup)/clientPhone");
+                    } else if (screenType === "handler") {
+                        router.push("/(root)/(handler)/(main)/handlerHome");
+                    }
+                }, 2000);
+            } else {
+                showStatusMessage("Incorrect Passcode", true);
+                setInputCode("");
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+            }
+        } catch (error) {
+            console.error("Error fetching screen code:", error);
+            showStatusMessage("Error fetching code", true);
         }
     };
 

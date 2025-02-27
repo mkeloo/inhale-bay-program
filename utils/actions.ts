@@ -33,6 +33,27 @@ export const fetchStores = async (): Promise<Store[]> => {
     return data || [];
 };
 
+
+// ───────────────────────────────────────────────────────────
+// Fetch Screen Code by Screen Name from Supabase
+// ───────────────────────────────────────────────────────────
+
+export const fetchScreenCodeByName = async (screenName: string): Promise<number | null> => {
+    const { data, error } = await supabase
+        .from('screen_codes')
+        .select('screen_code')
+        .eq('screen_name', screenName)
+        .maybeSingle();
+
+    if (error) {
+        console.error(`Error fetching screen code for ${screenName}:`, error);
+        return null;
+    }
+
+    return data?.screen_code || null;
+};
+
+
 // ───────────────────────────────────────────────────────────
 // Fetch Store ID by Store Code
 // ───────────────────────────────────────────────────────────
