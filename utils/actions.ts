@@ -103,6 +103,124 @@ export const subscribeToDeviceStatus = (callback: (status: DeviceStatus[]) => vo
 };
 
 // ───────────────────────────────────────────────────────────
+// Send Client Device Information to Supabase
+// ───────────────────────────────────────────────────────────
+export const sendClientDeviceInfo = async (
+    storeId: string,
+    wifiStrength: string,
+    ipAddress: string,
+    connectionType: string,
+    isConnected: boolean,
+    cellularGeneration: string,
+    carrier: string,
+    batteryLevel: number
+) => {
+    const { error } = await supabase
+        .from("client_device_info")
+        .upsert(
+            [
+                {
+                    store_id: storeId,
+                    wifi_strength: wifiStrength,
+                    ip_address: ipAddress,
+                    connection_type: connectionType,
+                    is_connected: isConnected,
+                    cellular_generation: cellularGeneration,
+                    carrier: carrier,
+                    battery_level: batteryLevel,
+                    last_updated: new Date().toISOString(),
+                },
+            ],
+            { onConflict: "id" } // ✅ Uses `id` which is unique
+        );
+
+    if (error) {
+        console.error("Error sending client device info:", error);
+    }
+};
+
+// ───────────────────────────────────────────────────────────
+// Send Handler Device Information to Supabase
+// ───────────────────────────────────────────────────────────
+export const sendHandlerDeviceInfo = async (
+    storeId: string,
+    wifiStrength: string,
+    ipAddress: string,
+    connectionType: string,
+    isConnected: boolean,
+    cellularGeneration: string,
+    carrier: string,
+    batteryLevel: number
+) => {
+    const { error } = await supabase
+        .from("handler_device_info")
+        .upsert(
+            [
+                {
+                    store_id: storeId,
+                    wifi_strength: wifiStrength,
+                    ip_address: ipAddress,
+                    connection_type: connectionType,
+                    is_connected: isConnected,
+                    cellular_generation: cellularGeneration,
+                    carrier: carrier,
+                    battery_level: batteryLevel,
+                    last_updated: new Date().toISOString(),
+                },
+            ],
+            { onConflict: "id" } // ✅ Uses `id` which is unique
+        );
+
+    if (error) {
+        console.error("Error sending handler device info:", error);
+    }
+};
+
+// ───────────────────────────────────────────────────────────
+// Fetch Device Information for Admin from Supabase
+// ───────────────────────────────────────────────────────────
+export const fetchDeviceInfoForAdmin = async () => {
+    const { data: clientData, error: clientError } = await supabase
+        .from("client_device_info")
+        .select(`
+            store_id,
+            wifi_strength,
+            ip_address,
+            connection_type,
+            is_connected,
+            cellular_generation,
+            carrier,
+            battery_level,
+            last_updated
+        `)
+        .order("last_updated", { ascending: false })
+        .limit(1); // Get latest client data
+
+    const { data: handlerData, error: handlerError } = await supabase
+        .from("handler_device_info")
+        .select(`
+            store_id,
+            wifi_strength,
+            ip_address,
+            connection_type,
+            is_connected,
+            cellular_generation,
+            carrier,
+            battery_level,
+            last_updated
+        `)
+        .order("last_updated", { ascending: false })
+        .limit(1); // Get latest handler data
+
+    if (clientError || handlerError) {
+        console.error("Error fetching device info:", clientError || handlerError);
+        return { client: null, handler: null };
+    }
+
+    return { client: clientData ? clientData[0] : null, handler: handlerData ? handlerData[0] : null };
+};
+
+// ───────────────────────────────────────────────────────────
 // Fetch Store Information from Supabase
 // ───────────────────────────────────────────────────────────
 export interface Store {

@@ -5,8 +5,10 @@ import { supabase } from '@/utils/supabase';
 import { getAvatar } from '@/utils/functions';
 import { useCustomerStore } from '@/stores/customerStore';
 import { Customer, RecentVisit } from '@/types/type';
-import { fetchCustomerById, fetchStoreIdByCode, logRecentVisit, sendHandlerHeartbeat } from '@/utils/actions';
+import { fetchCustomerById, fetchStoreIdByCode, logRecentVisit, sendHandlerDeviceInfo, sendHandlerHeartbeat } from '@/utils/actions';
 import { useFocusEffect } from '@react-navigation/native';
+import NetInfo from '@react-native-community/netinfo';
+import * as Battery from 'expo-battery';
 
 
 export default function HandlerHomeScreen() {
@@ -44,6 +46,52 @@ export default function HandlerHomeScreen() {
                 sendHandlerHeartbeat(storeId, "handler_dashboard", "❌ Stopping heartbeat...");
                 clearInterval(interval);
             };
+        }, [storeId])
+    );
+
+
+    // ───────────────────────────────────────────────────────────
+    // State & Effect Hook for Device Info (WiFi & Battery)
+    // ───────────────────────────────────────────────────────────
+    useFocusEffect(
+        useCallback(() => {
+            if (!storeId) return;
+
+            const sendDeviceInfo = async () => {
+                const netInfo = await NetInfo.fetch();
+                const batteryLevel = await Battery.getBatteryLevelAsync();
+
+                // Ensure `netInfo.details` is properly typed
+                const details = netInfo.details as any || {};
+
+                // Safely extract IP address (only exists in WiFi mode)
+                const ipAddress = netInfo.type === "wifi" && details?.ipAddress
+                    ? details.ipAddress
+                    : "N/A";
+
+                sendHandlerDeviceInfo(
+                    storeId,
+                    netInfo.type === "wifi" && details?.strength !== undefined
+                        ? `${details.strength} dBm`
+                        : "N/A",
+                    ipAddress, // ✅ Now safely extracted
+                    netInfo.type || "unknown",
+                    netInfo.isConnected ?? false,
+                    netInfo.type === "cellular" ? details?.cellularGeneration || "Unknown" : "N/A",
+                    netInfo.type === "cellular" ? details?.carrier || "Unknown" : "N/A",
+                    Math.round(batteryLevel * 100) // Convert to percentage
+                );
+            };
+
+            // Initial send
+            sendDeviceInfo();
+
+            // Start interval for periodic updates
+            const interval = setInterval(() => {
+                sendDeviceInfo();
+            }, 5000);
+
+            return () => clearInterval(interval); // Cleanup on unmount
         }, [storeId])
     );
 

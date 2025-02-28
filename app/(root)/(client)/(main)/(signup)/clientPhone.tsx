@@ -4,8 +4,10 @@ import { router } from 'expo-router';
 import { X, BadgeCheck } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { useCustomerStore } from '@/stores/customerStore'; // Import Zustand store
-import { fetchCustomerByPhone, fetchStoreIdByCode, sendClientHeartbeat } from '@/utils/actions'; // Import fetch functions
+import { fetchCustomerByPhone, fetchStoreIdByCode, sendClientHeartbeat, sendClientDeviceInfo } from '@/utils/actions'; // Import fetch functions
 import { useFocusEffect } from '@react-navigation/native';
+import NetInfo from '@react-native-community/netinfo';
+import * as Battery from 'expo-battery';
 
 
 const STORE_CODE = "5751"; // Store code to track customers
@@ -47,6 +49,52 @@ export default function ClientPhoneScreen() {
         };
         getStoreId();
     }, []);
+
+
+    // ───────────────────────────────────────────────────────────
+    // State & Effect Hook for Device Info (WiFi & Battery)
+    // ───────────────────────────────────────────────────────────
+    useFocusEffect(
+        useCallback(() => {
+            if (!storeId) return;
+
+            const sendDeviceInfo = async () => {
+                const netInfo = await NetInfo.fetch();
+                const batteryLevel = await Battery.getBatteryLevelAsync();
+
+                // Ensure `netInfo.details` is properly typed
+                const details = netInfo.details as any || {};
+
+                // Safely extract IP address (only exists in WiFi mode)
+                const ipAddress = netInfo.type === "wifi" && details?.ipAddress
+                    ? details.ipAddress
+                    : "N/A";
+
+                sendClientDeviceInfo(
+                    storeId,
+                    netInfo.type === "wifi" && details?.strength !== undefined
+                        ? `${details.strength} dBm`
+                        : "N/A",
+                    ipAddress, // ✅ Now safely extracted
+                    netInfo.type || "unknown",
+                    netInfo.isConnected ?? false,
+                    netInfo.type === "cellular" ? details?.cellularGeneration || "Unknown" : "N/A",
+                    netInfo.type === "cellular" ? details?.carrier || "Unknown" : "N/A",
+                    Math.round(batteryLevel * 100) // Convert to percentage
+                );
+            };
+
+            // Initial send
+            sendDeviceInfo();
+
+            // Start interval for periodic updates
+            const interval = setInterval(() => {
+                sendDeviceInfo();
+            }, 5000);
+
+            return () => clearInterval(interval); // Cleanup on unmount
+        }, [storeId])
+    );
 
 
     // Handle number input with light haptic feedback and secret logic for "555555"
