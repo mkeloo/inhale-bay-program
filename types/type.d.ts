@@ -1,3 +1,19 @@
+// Define the type for device status
+export interface DeviceStatus {
+    client: boolean;
+    screen_name: string;
+    is_online: boolean;
+    last_ping: string;
+    message: string;
+}
+
+export interface UserType {
+    id: number;
+    user_type_name: string;
+    description: string;
+}
+
+
 export interface ScreenCodeProps {
     id: number
     name: string
@@ -66,3 +82,5 @@ export interface Customer {
     is_active?: boolean;
     joined_date?: string;
 }
+
+

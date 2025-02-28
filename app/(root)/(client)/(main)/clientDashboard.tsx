@@ -2,7 +2,7 @@
 // Imports
 // ───────────────────────────────────────────────────────────
 import { View, Text, Image, FlatList } from 'react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { router } from 'expo-router';
 import BackButton from '@/components/shared/BackButton';
 import RewardCard from '@/components/shared/RewardCard';
@@ -14,7 +14,10 @@ import {
     fetchRewards,
     Reward,
     logCustomerTransaction,
+    sendClientHeartbeat,
+    fetchStoreIdByCode
 } from '@/utils/actions';
+import { useFocusEffect } from '@react-navigation/native';
 
 // ───────────────────────────────────────────────────────────
 // Component: ClientDashboardScreen
@@ -24,12 +27,45 @@ export default function ClientDashboardScreen() {
     // Global & Local State
     // ─────────────────────────────────────────────────────────
     const { phone_number, name, avatar_name, store_id } = useCustomerStore();
+    const [storeId, setStoreId] = useState<string | null>(null);
     const [customerExists, setCustomerExists] = useState(false);
     const [rewards, setRewards] = useState<Reward[]>([]);
     const [customerData, setCustomerData] = useState<{ current_points: number } | null>(null);
 
     // Tracks if customer login has already been logged (avoid duplicates)
     const hasLoggedRef = useRef(false);
+
+    // ─────────────────────────────────────────────────────────
+    // useEffect: Fetch Store ID for Heartbeat Tracking
+    // ─────────────────────────────────────────────────────────
+    useEffect(() => {
+        const fetchStoreId = async () => {
+            const id = await fetchStoreIdByCode("5751");
+            setStoreId(id);
+        };
+        fetchStoreId();
+    }, []);
+
+
+    // ───────────────────────────────────────────────────────────
+    // State & Effect Hook for Heartbeat (Only Active Screens)
+    // ───────────────────────────────────────────────────────────
+    useFocusEffect(
+        useCallback(() => {
+            if (!storeId) return;
+
+            // Start heartbeat when screen is focused
+            const interval = setInterval(() => {
+                sendClientHeartbeat(storeId, "client_dashboard", "📡 Sending heartbeat...");
+            }, 5000);
+
+            return () => {
+                sendClientHeartbeat(storeId, "client_dashboard", "❌ Stopping heartbeat...");
+                clearInterval(interval);
+            };
+        }, [storeId])
+    );
+
 
     // ─────────────────────────────────────────────────────────
     // useEffect: Fetch Rewards

@@ -5,14 +5,47 @@ import { supabase } from '@/utils/supabase';
 import { getAvatar } from '@/utils/functions';
 import { useCustomerStore } from '@/stores/customerStore';
 import { Customer, RecentVisit } from '@/types/type';
-import { fetchCustomerById, logRecentVisit } from '@/utils/actions';
+import { fetchCustomerById, fetchStoreIdByCode, logRecentVisit, sendHandlerHeartbeat } from '@/utils/actions';
+import { useFocusEffect } from '@react-navigation/native';
 
 
 export default function HandlerHomeScreen() {
+    const [storeId, setStoreId] = useState<string | null>(null);
     const [customer, setCustomer] = useState<Customer | null>(null);
     const [refreshing, setRefreshing] = useState(false); // Refresh state
     const [recentVisits, setRecentVisits] = useState<RecentVisit[]>([]);
     const setCustomerData = useCustomerStore((state) => state.setCustomerData);
+
+    // ─────────────────────────────────────────────────────────
+    // useEffect: Fetch Store ID for Heartbeat Tracking
+    // ─────────────────────────────────────────────────────────
+    useEffect(() => {
+        const fetchStoreId = async () => {
+            const id = await fetchStoreIdByCode("5751");
+            setStoreId(id);
+        };
+        fetchStoreId();
+    }, []);
+
+
+    // ───────────────────────────────────────────────────────────
+    // State & Effect Hook for Handler Heartbeat (Only Active Screens)
+    // ───────────────────────────────────────────────────────────
+    useFocusEffect(
+        useCallback(() => {
+            if (!storeId) return;
+
+            // Start heartbeat when screen is focused
+            const interval = setInterval(() => {
+                sendHandlerHeartbeat(storeId, "handler_dashboard", "📡 Sending heartbeat...");
+            }, 5000);
+
+            return () => {
+                sendHandlerHeartbeat(storeId, "handler_dashboard", "❌ Stopping heartbeat...");
+                clearInterval(interval);
+            };
+        }, [storeId])
+    );
 
     // Fetch recent visits rows and attach customer info via customer_id
     const fetchRecentVisits = useCallback(async () => {

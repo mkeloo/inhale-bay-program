@@ -1,10 +1,106 @@
+import { DeviceStatus, UserType } from '@/types/type';
 import { supabase } from '@/utils/supabase';
 
-export interface UserType {
-    id: number;
-    user_type_name: string;
-    description: string;
-}
+
+
+// ───────────────────────────────────────────────────────────
+// Send Client Heartbeat to Supabase with Message Logging
+// ───────────────────────────────────────────────────────────
+export const sendClientHeartbeat = async (
+    storeId: string,
+    screenName: string,
+    message: string // New message parameter
+) => {
+    const { error } = await supabase
+        .from("device_status")
+        .upsert([
+            {
+                client: true, // ✅ This is a client device
+                store_id: storeId,
+                screen_name: screenName,
+                last_ping: new Date().toISOString(),
+                is_online: true,
+                message: message, // ✅ Store the message
+            },
+        ], { onConflict: "id" }); // Sequential tracking
+
+    if (error) {
+        console.error("Error sending heartbeat:", error);
+    }
+};
+
+
+// ───────────────────────────────────────────────────────────
+// Send Handler Heartbeat to Supabase with Message Logging
+// ───────────────────────────────────────────────────────────
+export const sendHandlerHeartbeat = async (
+    storeId: string,
+    screenName: string,
+    message: string // New message parameter
+) => {
+    const { error } = await supabase
+        .from("device_status")
+        .upsert([
+            {
+                client: false, // ✅ This is a handler device
+                store_id: storeId,
+                screen_name: screenName,
+                last_ping: new Date().toISOString(),
+                is_online: true,
+                message: message, // ✅ Store the message
+            },
+        ], { onConflict: "id" }); // Sequential tracking
+
+    if (error) {
+        console.error("Error sending handler heartbeat:", error);
+    }
+};
+
+
+// ───────────────────────────────────────────────────────────
+// Fetch Device Status from Supabase (Initial Fetch)
+// ───────────────────────────────────────────────────────────
+export const fetchDeviceStatus = async (): Promise<DeviceStatus[] | null> => {
+    const { data, error } = await supabase
+        .from("device_status")
+        .select("client, screen_name, is_online, last_ping, message")
+        .order("last_ping", { ascending: false }) // Sort by latest update
+        .limit(2); // Get only the latest records for both devices
+
+    if (error) {
+        console.error("Error fetching device status:", error);
+        return null;
+    }
+
+    return data as DeviceStatus[];
+};
+
+
+// ───────────────────────────────────────────────────────────
+// Subscribe to Device Status Updates (Real-Time Listener)
+// ───────────────────────────────────────────────────────────
+export const subscribeToDeviceStatus = (callback: (status: DeviceStatus[]) => void) => {
+    const subscription = supabase
+        .channel("device_status_updates")
+        .on(
+            "postgres_changes",
+            { event: "*", schema: "public", table: "device_status" },
+            async (payload) => {
+                console.log("🔄 Device status updated:", payload);
+
+                // Fetch latest status after update
+                const updatedStatus = await fetchDeviceStatus();
+                if (updatedStatus) {
+                    callback(updatedStatus); // ✅ Trigger callback with new data
+                }
+            }
+        )
+        .subscribe();
+
+    return () => {
+        supabase.removeChannel(subscription); // Cleanup subscription
+    };
+};
 
 // ───────────────────────────────────────────────────────────
 // Fetch Store Information from Supabase

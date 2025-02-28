@@ -1,10 +1,12 @@
 import { View, Text, TouchableOpacity, TextInput, Image } from 'react-native';
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { router } from 'expo-router';
 import { X, BadgeCheck } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { useCustomerStore } from '@/stores/customerStore'; // Import Zustand store
-import { fetchCustomerByPhone, fetchStoreIdByCode } from '@/utils/actions'; // Import fetch functions
+import { fetchCustomerByPhone, fetchStoreIdByCode, sendClientHeartbeat } from '@/utils/actions'; // Import fetch functions
+import { useFocusEffect } from '@react-navigation/native';
+
 
 const STORE_CODE = "5751"; // Store code to track customers
 
@@ -14,6 +16,28 @@ export default function ClientPhoneScreen() {
     const [storeId, setStoreId] = useState<string | null>(null);
     const deleteInterval = useRef<NodeJS.Timeout | null>(null);
     const setCustomerData = useCustomerStore((state) => state.setCustomerData);
+
+
+
+    // ───────────────────────────────────────────────────────────
+    // State & Effect Hook for Heartbeat (Only Active Screens)
+    // ───────────────────────────────────────────────────────────
+    useFocusEffect(
+        React.useCallback(() => {
+            if (!storeId) return;
+
+            // Start heartbeat when screen is focused
+            const interval = setInterval(() => {
+                sendClientHeartbeat(storeId, "client_phone_screen", "📡 Sending heartbeat...");
+            }, 5000);
+
+            return () => {
+                sendClientHeartbeat(storeId, "client_phone_screen", "❌ Stopping heartbeat...");
+                clearInterval(interval);
+            };
+        }, [storeId])
+    );
+
 
     // 🔍 Fetch store ID on mount
     useEffect(() => {
