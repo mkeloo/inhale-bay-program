@@ -1,4 +1,4 @@
-import { DeviceStatus, UserType } from '@/types/type';
+import { DeviceStatus, TransactionWithCustomer, UserType } from '@/types/type';
 import { supabase } from '@/utils/supabase';
 
 
@@ -666,4 +666,43 @@ export const logCustomerTransaction = async (
         return null;
     }
     return data;
+};
+
+
+// ───────────────────────────────────────────────────────────
+// Fetch Customer Transactions
+// ───────────────────────────────────────────────────────────
+
+// 2) Function to fetch the last 3 days of transactions
+export const fetchTransactionHistoryLast3Days = async (): Promise<TransactionWithCustomer[]> => {
+    // Calculate date/time from 3 days ago
+    const threeDaysAgo = new Date();
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+
+    // 1) Fetch transactions within last 3 days
+    const { data: txData, error } = await supabase
+        .from("customer_transactions")
+        .select("*")
+        .gte("created_at", threeDaysAgo.toISOString()) // Filter for last 3 days
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        console.error("Error fetching 3-day transactions:", error);
+        return [];
+    }
+    if (!txData || txData.length === 0) return [];
+
+    // 2) For each transaction, attach customer info
+    const results: TransactionWithCustomer[] = [];
+    for (const tx of txData) {
+        const customer = await fetchCustomerById(tx.customer_id);
+        results.push({
+            ...tx,
+            customer_name: customer?.name || "Unknown",
+            phone_number: customer?.phone_number || "",
+            avatar_name: customer?.avatar_name || "",
+        });
+    }
+
+    return results;
 };

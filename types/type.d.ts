@@ -84,3 +84,18 @@ export interface Customer {
 }
 
 
+
+export interface TransactionWithCustomer {
+    id: number;
+    store_id: string;
+    customer_id: string;
+    transaction_type: 'signup' | 'visit' | 'redeem_reward';
+    points_changed: number;
+    net_points: number;
+    reward_id?: number | null;
+    created_at: string; // e.g. "2025-02-26T18:30:00.000Z"
+    // Attached customer fields
+    customer_name?: string;
+    phone_number?: string;
+    avatar_name?: string;
+}
