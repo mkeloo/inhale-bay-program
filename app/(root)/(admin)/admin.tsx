@@ -16,6 +16,7 @@ import {
     Signal,
     Globe,
     Antenna,
+    RefreshCw,
 } from "lucide-react-native";
 
 export default function AdminScreen() {
@@ -92,28 +93,28 @@ export default function AdminScreen() {
                 <View className="flex-row justify-center gap-x-6 mb-10">
                     <Pressable
                         onPress={() => router.push("/welcome")}
-                        className="bg-green-400 w-44 py-4 rounded-xl flex items-center justify-center"
+                        className="bg-green-200 w-44 py-4 rounded-xl flex items-center justify-center"
                     >
-                        <Text className="text-black text-3xl font-bold">Welcome</Text>
+                        <Text className="text-green-900 text-3xl font-bold">Welcome</Text>
                     </Pressable>
                     <Pressable
                         onPress={() => router.push("/(root)/(client)/(main)/(signup)/clientPhone")}
-                        className="bg-yellow-400 w-44 py-4 rounded-xl flex items-center justify-center"
+                        className="bg-yellow-200 w-44 py-4 rounded-xl flex items-center justify-center"
                     >
-                        <Text className="text-black text-3xl font-bold">Client</Text>
+                        <Text className="text-yellow-900 text-3xl font-bold">Client</Text>
                     </Pressable>
                     <Pressable
                         onPress={() => router.push("/(root)/(handler)/(main)/handlerHome")}
-                        className="bg-red-400 w-44 py-4 rounded-xl flex items-center justify-center"
+                        className="bg-red-200 w-44 py-4 rounded-xl flex items-center justify-center"
                     >
-                        <Text className="text-black text-3xl font-bold">Handler</Text>
+                        <Text className="text-red-900 text-3xl font-bold">Handler</Text>
                     </Pressable>
 
                     <Pressable
                         onPress={() => router.push('/refresh')} // Navigates to the refresh route
-                        className="bg-red-400 w-44 py-4 rounded-xl flex items-center justify-center"
+                        className="bg-green-200 px-6 py-4 rounded-xl flex items-center justify-center"
                     >
-                        <Text className="text-black text-3xl font-bold">Refresh</Text>
+                        <RefreshCw size={40} color="green" />
                     </Pressable>
                 </View>
 
