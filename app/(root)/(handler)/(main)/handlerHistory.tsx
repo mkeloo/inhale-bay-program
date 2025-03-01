@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, ScrollView } from 'react-native';
+import { View, Text, Image, ScrollView, ActivityIndicator } from 'react-native';
 import { fetchTransactionHistoryLast3Days } from '@/utils/actions';
 import { TransactionWithCustomer } from '@/types/type';
 import { getAvatar } from '@/utils/functions';
@@ -102,9 +102,11 @@ export default function HandlerHistoryScreen() {
             </Text>
 
             {Object.keys(groupedHistory).length === 0 && (
-                <Text className="text-lg">No transactions found.</Text>
+                <View className="flex-1 items-center justify-center">
+                    <ActivityIndicator size="large" color="#6B46C1" />
+                    <Text className="text-lg text-gray-700 mt-2">Loading transactions...</Text>
+                </View>
             )}
-
             {Object.keys(groupedHistory).map((groupLabel) => (
                 <View key={groupLabel} className="mb-8">
                     {/* Date Header */}
