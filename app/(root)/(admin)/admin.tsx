@@ -103,10 +103,17 @@ export default function AdminScreen() {
                         <Text className="text-black text-3xl font-bold">Client</Text>
                     </Pressable>
                     <Pressable
-                        onPress={() => router.push("/(root)/(handler)/handlerConfirm")}
+                        onPress={() => router.push("/(root)/(handler)/(main)/handlerHome")}
                         className="bg-red-400 w-44 py-4 rounded-xl flex items-center justify-center"
                     >
                         <Text className="text-black text-3xl font-bold">Handler</Text>
+                    </Pressable>
+
+                    <Pressable
+                        onPress={() => router.push('/refresh')} // Navigates to the refresh route
+                        className="bg-red-400 w-44 py-4 rounded-xl flex items-center justify-center"
+                    >
+                        <Text className="text-black text-3xl font-bold">Refresh</Text>
                     </Pressable>
                 </View>
 

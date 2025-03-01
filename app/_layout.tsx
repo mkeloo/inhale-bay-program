@@ -90,6 +90,7 @@ export default function RootLayout() {
             animation: "slide_from_right", // This screen slides in from right
           }}
         />
+        <Stack.Screen name="refresh" options={{ headerShown: false, animation: "fade" }} />
       </Stack>
     </View>
   );
