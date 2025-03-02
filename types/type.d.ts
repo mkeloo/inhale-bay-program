@@ -99,3 +99,18 @@ export interface TransactionWithCustomer {
     phone_number?: string;
     avatar_name?: string;
 }
+
+
+export interface Store {
+    id: string;
+    store_name: string;
+    store_code: string;
+    address: string;
+    city: string;
+    state: string;
+    country: string;
+    zip_code: string;
+    phone_number: string;
+    email: string;
+    is_active: boolean;
+}

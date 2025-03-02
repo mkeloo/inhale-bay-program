@@ -1,4 +1,4 @@
-import { DeviceStatus, TransactionWithCustomer, UserType } from '@/types/type';
+import { DeviceStatus, Store, TransactionWithCustomer, UserType } from '@/types/type';
 import { supabase } from '@/utils/supabase';
 
 
@@ -86,7 +86,7 @@ export const subscribeToDeviceStatus = (callback: (status: DeviceStatus[]) => vo
             "postgres_changes",
             { event: "*", schema: "public", table: "device_status" },
             async (payload) => {
-                console.log("🔄 Device status updated:", payload);
+                // console.log("🔄 Device status updated:", payload);
 
                 // Fetch latest status after update
                 const updatedStatus = await fetchDeviceStatus();
@@ -223,18 +223,6 @@ export const fetchDeviceInfoForAdmin = async () => {
 // ───────────────────────────────────────────────────────────
 // Fetch Store Information from Supabase
 // ───────────────────────────────────────────────────────────
-export interface Store {
-    id: string;
-    store_name: string;
-    store_code: string;
-    address: string;
-    city: string;
-    state: string;
-    country: string;
-    phone_number: string;
-    email: string;
-    is_active: boolean;
-}
 
 export const fetchStores = async (): Promise<Store[]> => {
     const { data, error } = await supabase.from('inhale_bay_stores').select('*');
@@ -705,4 +693,104 @@ export const fetchTransactionHistoryLast3Days = async (): Promise<TransactionWit
     }
 
     return results;
+};
+
+
+// ───────────────────────────────────────────────────────────
+// Submit Request to Supabase
+// ───────────────────────────────────────────────────────────
+export const submitRequest = async (
+    storeId: string,
+    deviceType: "client" | "handler",
+    subject: string,
+    message: string,
+    category: string
+) => {
+    const { data, error } = await supabase
+        .from("requests")
+        .insert([
+            {
+                store_id: storeId,
+                device_type: deviceType,
+                subject,
+                message,
+                category,
+                status: "Pending", // Default status
+            },
+        ])
+        .select();
+
+    if (error) {
+        console.error("Error submitting request:", error);
+        return { success: false, error };
+    }
+
+    return { success: true, data };
+};
+
+
+// ───────────────────────────────────────────────────────────
+// Fetch All Requests from Supabase
+// ───────────────────────────────────────────────────────────
+// Function to fetch all requests for a store
+export const getRequests = async (storeId: string) => {
+    const { data, error } = await supabase
+        .from("requests")
+        .select("*")
+        .eq("store_id", storeId)
+        .order("submitted_at", { ascending: false });
+
+    if (error) {
+        console.error("Error fetching requests:", error);
+        return { success: false, error };
+    }
+
+    return { success: true, data };
+};
+
+// ───────────────────────────────────────────────────────────
+// Fetch a Request by its ID
+// ───────────────────────────────────────────────────────────
+// Function to fetch a request by its ID
+export const getRequestById = async (requestId: string) => {
+    const { data, error } = await supabase
+        .from("requests")
+        .select("*")
+        .eq("id", requestId)
+        .single();
+
+    if (error) {
+        console.error("Error fetching request details:", error);
+        return { success: false, error };
+    }
+
+    return { success: true, data };
+};
+
+
+
+// ───────────────────────────────────────────────────────────
+// Update Request Status in Supabase
+// ───────────────────────────────────────────────────────────
+// Function to update request status
+export const updateRequestStatus = async (
+    requestId: string,
+    newStatus: "Pending" | "In Progress" | "Resolved",
+    updateInfo?: string // Optional update message
+) => {
+    const { data, error } = await supabase
+        .from("requests")
+        .update({
+            status: newStatus,
+            update_info: updateInfo || null // Store update info if provided
+        })
+        .eq("id", requestId)
+        .select();
+
+    if (error) {
+        console.error("Error updating request status:", error);
+        return { success: false, error };
+    }
+
+    return { success: true, data };
 };
