@@ -24,9 +24,9 @@ export const sendClientHeartbeat = async (
             },
         ], { onConflict: "id" }); // Sequential tracking
 
-    if (error) {
-        console.error("Error sending heartbeat:", error);
-    }
+    // if (error) {
+    //     console.error("Error sending heartbeat:", error);
+    // }
 };
 
 
@@ -51,9 +51,9 @@ export const sendHandlerHeartbeat = async (
             },
         ], { onConflict: "id" }); // Sequential tracking
 
-    if (error) {
-        console.error("Error sending handler heartbeat:", error);
-    }
+    // if (error) {
+    //     console.error("Error sending handler heartbeat:", error);
+    // }
 };
 
 
