@@ -9,6 +9,7 @@ import { fetchCustomerById, fetchStoreIdByCode, logRecentVisit, sendHandlerDevic
 import { useFocusEffect } from '@react-navigation/native';
 import NetInfo from '@react-native-community/netinfo';
 import * as Battery from 'expo-battery';
+import { Search } from 'lucide-react-native';
 
 
 export default function HandlerHomeScreen() {
@@ -280,6 +281,16 @@ export default function HandlerHomeScreen() {
                             className="bg-green-500 p-4 w-56 rounded-xl"
                         >
                             <Text className="text-white text-2xl text-center">Refresh</Text>
+                        </Pressable>
+
+                        <Pressable
+                            onPress={() => router.push('/(root)/(handler)/(misc)/search')}
+                            className="bg-purple-500 p-4 w-56 rounded-xl flex flex-row items-center justify-center gap-x-5"
+                        >
+                            <Search size={35} color="yellow" />
+                            <Text className="text-white text-2xl text-center">
+                                Search
+                            </Text>
                         </Pressable>
                     </View>
 

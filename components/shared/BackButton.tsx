@@ -16,7 +16,7 @@ configureReanimatedLogger({
 
 export default function BackButton() {
     return (
-        <View className='absolute top-10 left-10'>
+        <View className='absolute top-10 left-10 z-20'>
             <TouchableOpacity
                 onPress={() => {
                     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); // Haptic feedback
